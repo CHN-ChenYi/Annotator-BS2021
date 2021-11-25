@@ -1,0 +1,7 @@
+-- Your SQL goes here
+CREATE TABLE users (
+  id VARCHAR(255) NOT NULL PRIMARY KEY,
+  email VARCHAR(127) NOT NULL UNIQUE,
+  username VARCHAR(255) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL
+)
