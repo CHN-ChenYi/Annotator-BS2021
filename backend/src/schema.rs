@@ -1,4 +1,11 @@
 table! {
+    images (id) {
+        id -> Varchar,
+        uid -> Varchar,
+    }
+}
+
+table! {
     users (id) {
         id -> Varchar,
         email -> Varchar,
@@ -6,3 +13,8 @@ table! {
         password -> Varchar,
     }
 }
+
+allow_tables_to_appear_in_same_query!(
+    images,
+    users,
+);

@@ -21,6 +21,8 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
     dotenv::dotenv().ok();
 
+    let _ = std::env::var("UPLOADED_FILE_LOCATION").expect("UPLOADED_FILE_LOCATION");
+
     let connspec = std::env::var("DATABASE_URL").expect("DATABASE_URL");
     let manager = ConnectionManager::<MysqlConnection>::new(connspec);
     let pool = r2d2::Pool::builder()
@@ -45,6 +47,7 @@ async fn main() -> std::io::Result<()> {
             .service(handlers::signup_user)
             .service(handlers::login_user)
             .service(handlers::logout_user)
+            .service(handlers::upload_image)
     })
     .bind(&bind)?
     .run()

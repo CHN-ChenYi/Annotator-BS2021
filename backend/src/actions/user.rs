@@ -7,20 +7,6 @@ use uuid::Uuid;
 use crate::models;
 use crate::DbError;
 
-pub fn find_user_by_uid(
-    uid: Uuid,
-    conn: &MysqlConnection,
-) -> Result<Option<models::User>, DbError> {
-    use crate::schema::users::dsl::*;
-
-    let user = users
-        .filter(id.eq(uid.to_string()))
-        .first::<models::User>(conn)
-        .optional()?;
-
-    Ok(user)
-}
-
 pub fn insert_new_user(
     email_: &str,
     username_: &str,

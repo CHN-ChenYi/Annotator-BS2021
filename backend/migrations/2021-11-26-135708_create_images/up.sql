@@ -1,0 +1,5 @@
+-- Your SQL goes here
+CREATE TABLE images (
+  id VARCHAR(255) NOT NULL PRIMARY KEY,
+  uid VARCHAR(255) NOT NULL
+)
