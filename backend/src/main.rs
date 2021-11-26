@@ -2,6 +2,7 @@
 extern crate diesel;
 
 use actix_web::{middleware, App, HttpServer};
+use actix_files::Files;
 use actix_identity::{CookieIdentityPolicy, IdentityService};
 use diesel::mysql::MysqlConnection;
 use diesel::r2d2::{self, ConnectionManager};
@@ -21,7 +22,7 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
     dotenv::dotenv().ok();
 
-    let _ = std::env::var("UPLOADED_FILE_LOCATION").expect("UPLOADED_FILE_LOCATION");
+    let filepath = std::env::var("UPLOADED_FILE_LOCATION").expect("UPLOADED_FILE_LOCATION") + &"/images";
 
     let connspec = std::env::var("DATABASE_URL").expect("DATABASE_URL");
     let manager = ConnectionManager::<MysqlConnection>::new(connspec);
@@ -48,6 +49,7 @@ async fn main() -> std::io::Result<()> {
             .service(handlers::login_user)
             .service(handlers::logout_user)
             .service(handlers::upload_image)
+            .service(Files::new("/image", &filepath).prefer_utf8(true))
     })
     .bind(&bind)?
     .run()
