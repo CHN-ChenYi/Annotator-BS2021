@@ -1,12 +1,12 @@
 #[macro_use]
 extern crate diesel;
-extern crate log;
 extern crate env_logger;
+extern crate log;
 extern crate threadpool;
 
-use actix_web::{middleware, App, HttpServer};
 use actix_files::Files;
 use actix_identity::{CookieIdentityPolicy, IdentityService};
+use actix_web::{middleware, web, App, HttpServer};
 use diesel::mysql::MysqlConnection;
 use diesel::r2d2::{self, ConnectionManager};
 use rand::Rng;
@@ -14,10 +14,10 @@ use rand::Rng;
 type DbPool = r2d2::Pool<ConnectionManager<MysqlConnection>>;
 type DbError = Box<dyn std::error::Error + Send + Sync>;
 
-mod schema;
-mod models;
-mod handlers;
 mod actions;
+mod handlers;
+mod models;
+mod schema;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -25,7 +25,8 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
     dotenv::dotenv().ok();
 
-    let filepath = std::env::var("UPLOADED_FILE_LOCATION").expect("UPLOADED_FILE_LOCATION") + &"/images";
+    let filepath =
+        std::env::var("UPLOADED_FILE_LOCATION").expect("UPLOADED_FILE_LOCATION") + &"/images";
 
     let connspec = std::env::var("DATABASE_URL").expect("DATABASE_URL");
     let manager = ConnectionManager::<MysqlConnection>::new(connspec);
@@ -49,12 +50,15 @@ async fn main() -> std::io::Result<()> {
                     .name("auth-example")
                     .secure(false),
             ))
-            .service(handlers::signup_user)
-            .service(handlers::login_user)
-            .service(handlers::logout_user)
-            .service(handlers::upload_image)
-            .service(Files::new("/image", &filepath).prefer_utf8(true))
-            .service(handlers::upload_video)
+            .service(
+                web::scope("/api")
+                    .service(handlers::signup_user)
+                    .service(handlers::login_user)
+                    .service(handlers::logout_user)
+                    .service(handlers::upload_image)
+                    .service(Files::new("/image", &filepath).prefer_utf8(true))
+                    .service(handlers::upload_video),
+            )
     })
     .bind(&bind)?
     .run()
