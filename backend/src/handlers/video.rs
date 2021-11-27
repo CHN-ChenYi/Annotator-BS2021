@@ -104,6 +104,13 @@ async fn upload_video(
                     }
                 }
             }
+            match std::fs::remove_file(video_file) {
+                Ok(_) => (),
+                Err(e) => {
+                    error!("{}", e);
+                    return;
+                }
+            }
         });
     }
 
