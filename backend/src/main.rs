@@ -2,6 +2,7 @@
 extern crate diesel;
 extern crate log;
 extern crate env_logger;
+extern crate threadpool;
 
 use actix_web::{middleware, App, HttpServer};
 use actix_files::Files;
@@ -41,6 +42,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .data(pool.clone())
+            .data(threadpool::ThreadPool::new(1))
             .wrap(middleware::Logger::default())
             .wrap(IdentityService::new(
                 CookieIdentityPolicy::new(&private_key)

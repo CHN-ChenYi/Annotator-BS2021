@@ -23,7 +23,8 @@ struct VideoInfo {
 
 #[post("/video/upload")]
 async fn upload_video(
-    pool: web::Data<crate::DbPool>,
+    db_pool: web::Data<crate::DbPool>,
+    thread_pool: web::Data<threadpool::ThreadPool>,
     id: Identity,
     mut payload: Multipart,
     info: web::Query<VideoInfo>,
@@ -33,6 +34,7 @@ async fn upload_video(
     }
 
     let filepath = std::env::var("UPLOADED_FILE_LOCATION").expect("UPLOADED_FILE_LOCATION");
+    let filepath_ = filepath.clone();
 
     while let Some(mut field) = payload.try_next().await? {
         let content_disposition = field
@@ -43,59 +45,66 @@ async fn upload_video(
             |f| Uuid::new_v4().to_string() + &get_file_ext(&sanitize_filename::sanitize(f)),
         );
 
-        let video_file = format!("{}/tmp/{}", filepath, filename);
-
+        let video_file = format!("{}/tmp/{}", filepath_, filename);
         let video_file_ = video_file.clone();
+
         let mut f = web::block(|| std::fs::File::create(video_file_)).await?;
 
         while let Some(chunk) = field.try_next().await? {
             f = web::block(move || f.write_all(&chunk).map(|_| f)).await?;
         }
 
-        for i in 0..info.cnt {
-            let filename = Uuid::new_v4().to_string();
-            let image_file = format!("{}/images/{}.jpg", filepath, filename);
+        let cnt = info.cnt;
+        let step = info.step;
+        let uid = id.identity().unwrap();
+        let filepath = filepath.clone();
+        let pool = db_pool.clone();
+        thread_pool.execute(move || {
+            for i in 0..cnt {
+                let filename = Uuid::new_v4().to_string();
+                let image_file = format!("{}/images/{}.jpg", filepath, filename);
 
-            let j = (i + 1) as f32 * info.step;
+                let j = (i + 1) as f32 * step;
 
-            let ffmpeg_output = std::process::Command::new("ffmpeg")
-                .arg("-ss")
-                .arg(j.to_string())
-                .arg("-i")
-                .arg(video_file.clone())
-                .arg("-frames:v")
-                .arg("1")
-                .arg("-y")
-                .arg(image_file.clone())
-                .output()
-                .unwrap();
+                let ffmpeg_output = std::process::Command::new("ffmpeg")
+                    .arg("-ss")
+                    .arg(j.to_string())
+                    .arg("-i")
+                    .arg(video_file.clone())
+                    .arg("-frames:v")
+                    .arg("1")
+                    .arg("-y")
+                    .arg(image_file.clone())
+                    .output()
+                    .unwrap();
 
-            if !(Path::new(&image_file).exists()) {
-                error!("ffmpeg status: {}", ffmpeg_output.status);
-                error!(
-                    "ffmpeg stdout: {}",
-                    String::from_utf8_lossy(&ffmpeg_output.stdout)
-                );
-                error!(
-                    "ffmpeg stderr: {}",
-                    String::from_utf8_lossy(&ffmpeg_output.stderr)
-                );
-                return Ok(HttpResponse::InternalServerError().finish());
+                if !(Path::new(&image_file).exists()) {
+                    error!("ffmpeg status: {}", ffmpeg_output.status);
+                    error!(
+                        "ffmpeg stdout: {}",
+                        String::from_utf8_lossy(&ffmpeg_output.stdout)
+                    );
+                    error!(
+                        "ffmpeg stderr: {}",
+                        String::from_utf8_lossy(&ffmpeg_output.stderr)
+                    );
+                    return;
+                }
+
+                let conn = match pool.get() {
+                    Ok(conn) => conn,
+                    Err(_) => return,
+                };
+
+                match insert_new_image(&filename, &uid, &conn) {
+                    Ok(_) => (),
+                    Err(e) => {
+                        error!("{}", e);
+                        return;
+                    }
+                }
             }
-
-            let uid = id.identity().unwrap();
-            let conn = match pool.get() {
-                Ok(conn) => conn,
-                Err(_) => return Ok(HttpResponse::InternalServerError().finish()),
-            };
-
-            web::block(move || insert_new_image(&filename, &uid, &conn))
-                .await
-                .map_err(|e| {
-                    eprintln!("{}", e);
-                    HttpResponse::InternalServerError().finish()
-                })?;
-        }
+        });
     }
 
     Ok(HttpResponse::Ok().into())
