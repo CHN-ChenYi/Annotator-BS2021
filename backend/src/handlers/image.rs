@@ -22,7 +22,7 @@ async fn upload_image(
 
     while let Some(mut field) = payload.try_next().await? {
         let filename = Uuid::new_v4().to_string();
-        let file = dbg!(format!("{}/images/{}.jpg", filepath, filename));
+        let file = format!("{}/images/{}.jpg", filepath, filename);
 
         let mut f = web::block(|| std::fs::File::create(file)).await?;
 

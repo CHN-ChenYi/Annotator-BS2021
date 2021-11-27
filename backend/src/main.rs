@@ -1,5 +1,7 @@
 #[macro_use]
 extern crate diesel;
+extern crate log;
+extern crate env_logger;
 
 use actix_web::{middleware, App, HttpServer};
 use actix_files::Files;
@@ -18,7 +20,7 @@ mod actions;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    std::env::set_var("RUST_LOG", "actix_web=info");
+    std::env::set_var("RUST_LOG", "actix_web=info,info");
     env_logger::init();
     dotenv::dotenv().ok();
 
@@ -32,7 +34,7 @@ async fn main() -> std::io::Result<()> {
 
     let bind = "127.0.0.1:8080";
 
-    println!("Starting server at: {}", &bind);
+    log::info!("Starting server at: {}", &bind);
 
     let private_key = rand::thread_rng().gen::<[u8; 32]>();
 
@@ -50,6 +52,7 @@ async fn main() -> std::io::Result<()> {
             .service(handlers::logout_user)
             .service(handlers::upload_image)
             .service(Files::new("/image", &filepath).prefer_utf8(true))
+            .service(handlers::upload_video)
     })
     .bind(&bind)?
     .run()
