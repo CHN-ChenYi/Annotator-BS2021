@@ -41,7 +41,7 @@ async fn upload_image(
         })
         .await
         .map_err(|e| {
-            eprintln!("{}", e);
+            log::error!("{}", e);
             HttpResponse::InternalServerError().finish()
         })?;
     }

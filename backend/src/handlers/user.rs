@@ -1,5 +1,6 @@
 use actix_identity::Identity;
 use actix_web::{post, web, Error, HttpResponse};
+use log::error;
 
 use crate::actions::*;
 use crate::models::*;
@@ -20,7 +21,7 @@ async fn signup_user(
     })
     .await
     .map_err(|e| {
-        eprintln!("{}", e);
+        error!("{}", e);
         HttpResponse::InternalServerError().finish()
     })?;
 
@@ -46,7 +47,7 @@ async fn login_user(
     })
     .await
     .map_err(|e| {
-        eprintln!("{}", e);
+        error!("{}", e);
         HttpResponse::InternalServerError().finish()
     })?;
 
