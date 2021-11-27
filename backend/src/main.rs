@@ -10,6 +10,7 @@ use actix_web::{middleware, web, App, HttpServer};
 use diesel::mysql::MysqlConnection;
 use diesel::r2d2::{self, ConnectionManager};
 use rand::Rng;
+use std::fs;
 
 type DbPool = r2d2::Pool<ConnectionManager<MysqlConnection>>;
 type DbError = Box<dyn std::error::Error + Send + Sync>;
@@ -25,8 +26,11 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
     dotenv::dotenv().ok();
 
-    let filepath =
-        std::env::var("UPLOADED_FILE_LOCATION").expect("UPLOADED_FILE_LOCATION") + &"/images";
+    let fileroot = std::env::var("UPLOADED_FILE_LOCATION").expect("UPLOADED_FILE_LOCATION");
+    fs::create_dir_all(fileroot.clone() + &"/images").expect("Couldn't create image directory");
+    fs::create_dir_all(fileroot.clone() + &"/tmp").expect("Couldn't create tmp directory");
+
+    let filepath = fileroot + &"/images";
 
     let connspec = std::env::var("DATABASE_URL").expect("DATABASE_URL");
     let manager = ConnectionManager::<MysqlConnection>::new(connspec);
