@@ -30,6 +30,7 @@ pub fn get_images_id_by_uid(uid_: &str, conn: &MysqlConnection) -> Result<Vec<St
     let images_id = images
         .filter(uid.eq(uid_))
         .select(id)
+        .order_by(created_at.desc())
         .load::<String>(conn)?;
 
     Ok(images_id)
