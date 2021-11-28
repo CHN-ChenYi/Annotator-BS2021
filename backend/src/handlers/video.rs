@@ -16,7 +16,7 @@ fn get_file_ext(filename: &str) -> String {
 }
 
 #[derive(Deserialize)]
-struct VideoInfo {
+struct UploadVideoQuery {
     step: f32,
     cnt: u32,
 }
@@ -27,7 +27,7 @@ async fn upload_video(
     thread_pool: web::Data<threadpool::ThreadPool>,
     id: Identity,
     mut payload: Multipart,
-    info: web::Query<VideoInfo>,
+    info: web::Query<UploadVideoQuery>,
 ) -> Result<HttpResponse, Error> {
     if id.identity().is_none() {
         return Ok(HttpResponse::Unauthorized().finish());

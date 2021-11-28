@@ -23,3 +23,17 @@ pub fn insert_new_image(
 
     Ok(new_image)
 }
+
+pub fn get_images_id_by_uid(
+    uid_: &str,
+    conn: &MysqlConnection,
+) -> Result<Vec<String>, DbError> {
+    use crate::schema::images::dsl::*;
+
+    let images_id = images
+        .filter(uid.eq(uid_))
+        .select(id)
+        .load::<String>(conn)?;
+
+    Ok(images_id)
+}

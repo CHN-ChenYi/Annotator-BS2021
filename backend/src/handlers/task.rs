@@ -1,5 +1,5 @@
 use actix_identity::Identity;
-use actix_web::{post, web, Error, HttpResponse};
+use actix_web::{get, post, web, Error, HttpResponse};
 use log::error;
 use uuid::Uuid;
 
@@ -37,7 +37,16 @@ async fn new_task(
 
     let _task = web::block(move || {
         let conn = pool.get()?;
-        insert_new_task(&tid, &uid, &form.title, &form.description, &content, &form.tags, &iids, &conn)
+        insert_new_task(
+            &tid,
+            &uid,
+            &form.title,
+            &form.description,
+            &content,
+            &form.tags,
+            &iids,
+            &conn,
+        )
     })
     .await
     .map_err(|e| {
@@ -46,4 +55,27 @@ async fn new_task(
     })?;
 
     Ok(HttpResponse::Ok().into())
+}
+
+#[get("/task/{tid}")]
+async fn get_task(
+    pool: web::Data<crate::DbPool>,
+    id: Identity,
+    tid: web::Path<String>,
+) -> Result<HttpResponse, Error> {
+    if id.identity().is_none() {
+        return Ok(HttpResponse::Unauthorized().finish());
+    }
+
+    let task = web::block(move || {
+        let conn = pool.get()?;
+        get_task_by_tid(&tid, &conn)
+    })
+    .await
+    .map_err(|e| {
+        error!("{}", e);
+        HttpResponse::InternalServerError().finish()
+    })?;
+
+    Ok(HttpResponse::Ok().json(task))
 }

@@ -44,3 +44,15 @@ pub fn insert_new_task(
         Err(e) => Err(DbError::from(e)),
     }
 }
+
+pub fn get_task_by_tid(
+    tid: &str,
+    conn: &MysqlConnection,
+) -> Result<models::Task, DbError> {
+    use crate::schema::tasks::dsl::*;
+
+    tasks
+        .filter(id.eq(tid))
+        .first::<models::Task>(conn)
+        .map_err(|e| DbError::from(e))
+}

@@ -1,9 +1,10 @@
 use std::io::Write;
 
 use actix_identity::Identity;
-use actix_web::{post, web, Error, HttpResponse};
 use actix_multipart::Multipart;
+use actix_web::{get, post, web, Error, HttpResponse};
 use futures_util::TryStreamExt as _;
+use log::error;
 use uuid::Uuid;
 
 use crate::actions::*;
@@ -36,15 +37,36 @@ async fn upload_image(
             Err(_) => return Ok(HttpResponse::InternalServerError().finish()),
         };
 
-        web::block(move || {
-            insert_new_image(&filename, &uid, &conn)
-        })
-        .await
-        .map_err(|e| {
-            log::error!("{}", e);
-            HttpResponse::InternalServerError().finish()
-        })?;
+        web::block(move || insert_new_image(&filename, &uid, &conn))
+            .await
+            .map_err(|e| {
+                error!("{}", e);
+                HttpResponse::InternalServerError().finish()
+            })?;
     }
 
     Ok(HttpResponse::Ok().into())
+}
+
+#[get("image/all")]
+async fn get_images_id(
+    pool: web::Data<crate::DbPool>,
+    id: Identity,
+) -> Result<HttpResponse, Error> {
+    if id.identity().is_none() {
+        return Ok(HttpResponse::Unauthorized().finish());
+    }
+    let uid = id.identity().unwrap();
+
+    let images_id = web::block(move || {
+        let conn = pool.get()?;
+        get_images_id_by_uid(&uid, &conn)
+    })
+    .await
+    .map_err(|e| {
+        error!("{}", e);
+        HttpResponse::InternalServerError().finish()
+    })?;
+
+    Ok(HttpResponse::Ok().json(images_id))
 }
