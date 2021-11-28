@@ -22,7 +22,7 @@ async fn signup_user(
     .await
     .map_err(|e| {
         error!("{}", e);
-        HttpResponse::InternalServerError().finish()
+        HttpResponse::InternalServerError().body(e.to_string())
     })?;
 
     let res = PublicUser {
@@ -48,7 +48,7 @@ async fn login_user(
     .await
     .map_err(|e| {
         error!("{}", e);
-        HttpResponse::InternalServerError().finish()
+        HttpResponse::InternalServerError().body(e.to_string())
     })?;
 
     if let Some(res) = user {
@@ -62,7 +62,6 @@ async fn login_user(
 
 #[post("/user/logout")]
 async fn logout_user(_: web::Data<crate::DbPool>, id: Identity) -> Result<HttpResponse, Error> {
-    dbg!(id.identity());
     id.forget();
     let res = HttpResponse::Found().header("location", "/").finish();
     Ok(res)

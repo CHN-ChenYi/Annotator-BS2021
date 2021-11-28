@@ -52,7 +52,7 @@ async fn new_task(
     .await
     .map_err(|e| {
         error!("{}", e);
-        HttpResponse::InternalServerError().finish()
+        HttpResponse::InternalServerError().body(e.to_string())
     })?;
 
     Ok(HttpResponse::Ok().into())
@@ -75,7 +75,7 @@ async fn get_task(
     .await
     .map_err(|e| {
         error!("{}", e);
-        HttpResponse::InternalServerError().finish()
+        HttpResponse::InternalServerError().body(e.to_string())
     })?;
 
     Ok(HttpResponse::Ok().json(task))
@@ -99,7 +99,7 @@ async fn claim_task(
     .await
     .map_err(|e| {
         error!("{}", e);
-        HttpResponse::InternalServerError().finish()
+        HttpResponse::InternalServerError().body(e.to_string())
     })?;
 
     match affected_rows {
@@ -126,7 +126,7 @@ async fn revoke_task(
     .await
     .map_err(|e| {
         error!("{}", e);
-        HttpResponse::InternalServerError().finish()
+        HttpResponse::InternalServerError().body(e.to_string())
     })?;
 
     match affected_rows {
@@ -154,7 +154,7 @@ async fn update_task(
     .await
     .map_err(|e| {
         error!("{}", e);
-        HttpResponse::InternalServerError().finish()
+        HttpResponse::InternalServerError().body(e.to_string())
     })?;
 
     match affected_rows {
@@ -195,7 +195,7 @@ async fn get_task_list(
     .await
     .map_err(|e| {
         error!("{}", e);
-        HttpResponse::InternalServerError().finish()
+        HttpResponse::InternalServerError().body(e.to_string())
     })?;
 
     Ok(HttpResponse::Ok().json(tasks))

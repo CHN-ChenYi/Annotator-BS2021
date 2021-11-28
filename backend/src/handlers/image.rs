@@ -34,14 +34,14 @@ async fn upload_image(
         let uid = id.identity().unwrap();
         let conn = match pool.get() {
             Ok(conn) => conn,
-            Err(_) => return Ok(HttpResponse::InternalServerError().finish()),
+            Err(e) => return Ok(HttpResponse::InternalServerError().body(e.to_string())),
         };
 
         web::block(move || insert_new_image(&filename, &uid, &conn))
             .await
             .map_err(|e| {
                 error!("{}", e);
-                HttpResponse::InternalServerError().finish()
+                HttpResponse::InternalServerError().body(e.to_string())
             })?;
     }
 
@@ -65,7 +65,7 @@ async fn get_images_id(
     .await
     .map_err(|e| {
         error!("{}", e);
-        HttpResponse::InternalServerError().finish()
+        HttpResponse::InternalServerError().body(e.to_string())
     })?;
 
     Ok(HttpResponse::Ok().json(images_id))
