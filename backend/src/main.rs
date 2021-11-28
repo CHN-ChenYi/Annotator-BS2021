@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate diesel;
+extern crate chrono;
 extern crate env_logger;
 extern crate log;
 extern crate threadpool;

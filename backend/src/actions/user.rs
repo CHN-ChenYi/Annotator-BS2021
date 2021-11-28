@@ -1,6 +1,6 @@
 extern crate bcrypt;
 
-use bcrypt::{hash, verify, DEFAULT_COST};
+use bcrypt::{hash, verify};
 use diesel::prelude::*;
 use uuid::Uuid;
 
@@ -15,7 +15,7 @@ pub fn insert_new_user(
 ) -> Result<models::User, DbError> {
     use crate::schema::users::dsl::*;
 
-    let hashed = hash(password_.to_owned(), DEFAULT_COST)?;
+    let hashed = hash(password_.to_owned(), 8)?;
 
     let new_user = models::User {
         id: Uuid::new_v4().to_string(),

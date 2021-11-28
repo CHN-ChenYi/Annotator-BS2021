@@ -13,6 +13,8 @@ pub fn insert_new_image(
     let new_image = models::Image {
         id: id_.to_owned(),
         uid: uid_.to_owned(),
+        tid: Option::None,
+        created_at: chrono::Utc::now().naive_utc(),
     };
 
     diesel::insert_into(images).values(&new_image).execute(conn)?;
