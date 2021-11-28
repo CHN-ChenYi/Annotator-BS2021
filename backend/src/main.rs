@@ -62,7 +62,8 @@ async fn main() -> std::io::Result<()> {
                     .service(handlers::logout_user)
                     .service(handlers::upload_image)
                     .service(Files::new("/image", &filepath).prefer_utf8(true))
-                    .service(handlers::upload_video),
+                    .service(handlers::upload_video)
+                    .service(handlers::new_task)
             )
     })
     .bind(&bind)?

@@ -8,20 +8,15 @@ table! {
 }
 
 table! {
-    tags (id) {
-        id -> Varchar,
-        tid -> Varchar,
-        content -> Varchar,
-    }
-}
-
-table! {
     tasks (id) {
         id -> Varchar,
         owner -> Varchar,
+        title -> Varchar,
+        description -> Varchar,
+        content -> Text,
+        tags -> Text,
         worker -> Nullable<Varchar>,
         status -> Tinyint,
-        content -> Text,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }
@@ -38,7 +33,6 @@ table! {
 
 allow_tables_to_appear_in_same_query!(
     images,
-    tags,
     tasks,
     users,
 );
