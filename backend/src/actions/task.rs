@@ -83,12 +83,38 @@ pub fn revoke_task_by_tid_and_uid(
 
     let task = tasks.filter(id.eq(tid_)).first::<models::Task>(conn)?;
 
-    if task.worker != Some(uid_.to_owned()) {
+    if task.owner != uid_.to_owned() {
         return Ok(0);
     }
 
     let affected_rows = diesel::update(tasks.find(tid_))
         .set(worker.eq(None::<String>))
+        .execute(conn)?;
+
+    Ok(affected_rows)
+}
+
+pub fn update_task_by_tid(
+    content_: &str,
+    status_: &i8,
+    tid_: &str,
+    uid_: &str,
+    conn: &MysqlConnection,
+) -> Result<usize, DbError> {
+    use crate::schema::tasks::dsl::*;
+
+    let task = tasks.filter(id.eq(tid_)).first::<models::Task>(conn)?;
+
+    if task.worker != Some(uid_.to_owned()) {
+        return Ok(0);
+    }
+
+    let affected_rows = diesel::update(tasks.find(tid_))
+        .set((
+            content.eq(content_),
+            status.eq(status_),
+            updated_at.eq(chrono::Utc::now().naive_utc()),
+        ))
         .execute(conn)?;
 
     Ok(affected_rows)

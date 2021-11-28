@@ -29,3 +29,9 @@ pub struct NewTask {
     pub images: Vec<NewTaskImage>,
     pub tags: String,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UpdateTask {
+    pub content: String,
+    pub status: i8,
+}

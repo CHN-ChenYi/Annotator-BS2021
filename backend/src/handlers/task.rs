@@ -1,5 +1,5 @@
 use actix_identity::Identity;
-use actix_web::{get, post, delete, web, Error, HttpResponse};
+use actix_web::{get, post, put, delete, web, Error, HttpResponse};
 use log::error;
 use uuid::Uuid;
 
@@ -121,6 +121,34 @@ async fn revoke_task(
     let affected_rows = web::block(move || {
         let conn = pool.get()?;
         revoke_task_by_tid_and_uid(&tid, &uid, &conn)
+    })
+    .await
+    .map_err(|e| {
+        error!("{}", e);
+        HttpResponse::InternalServerError().finish()
+    })?;
+
+    match affected_rows {
+        0 => Ok(HttpResponse::Forbidden().finish()),
+        _ => Ok(HttpResponse::Ok().finish()),
+    }
+}
+
+#[put("/task/{tid}")]
+async fn update_task(
+    pool: web::Data<crate::DbPool>,
+    id: Identity,
+    tid: web::Path<String>,
+    form: web::Json<UpdateTask>,
+) -> Result<HttpResponse, Error> {
+    if id.identity().is_none() {
+        return Ok(HttpResponse::Unauthorized().finish());
+    }
+    let uid = id.identity().unwrap();
+
+    let affected_rows = web::block(move || {
+        let conn = pool.get()?;
+        update_task_by_tid(&form.content, &form.status, &tid, &uid, &conn)
     })
     .await
     .map_err(|e| {
