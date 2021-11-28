@@ -119,3 +119,57 @@ pub fn update_task_by_tid(
 
     Ok(affected_rows)
 }
+
+pub fn select_task_list(
+    owner_: Option<&str>,
+    worker_: Option<&str>,
+    status_: Option<&i8>,
+    conn: &MysqlConnection,
+) -> Result<Vec<models::TaskListEntry>, DbError> {
+    use crate::schema::images::dsl::*;
+    use crate::schema::tasks::dsl::*;
+    assert_eq!(
+        owner_.is_some() || worker_.is_some() || status_.is_some(),
+        true
+    );
+    assert_ne!(owner_.is_some() && status_.is_some(), true);
+    assert_ne!(worker_.is_some() && status_.is_some(), true);
+    assert_ne!(owner_.is_some() && worker_.is_some(), true);
+
+    let mut query = tasks.into_boxed();
+    if let Some(owner__) = owner_ {
+        query = query.filter(owner.eq(owner__));
+    } else if let Some(worker__) = worker_ {
+        query = query.filter(worker.eq(worker__));
+    } else if let Some(status__) = status_ {
+        query = query
+            .filter(status.eq(status__))
+            .filter(worker.is_null());
+    }
+
+    let result = query.order(updated_at.desc()).load::<models::Task>(conn)?;
+
+    let mut list: Vec<models::TaskListEntry> = Vec::new();
+    for row in result.iter() {
+        let cover_image_ = format!(
+            "/api/image/{}.jpg",
+            images
+                .filter(tid.eq(row.id.to_owned()))
+                .first::<models::Image>(conn)?
+                .id
+        );
+        list.push(models::TaskListEntry {
+            id: row.id.to_owned(),
+            owner: row.owner.to_owned(),
+            title: row.title.to_owned(),
+            description: row.description.to_owned(),
+            worker: row.worker.to_owned(),
+            status: row.status,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+            cover_image: cover_image_.to_owned(),
+        });
+    }
+
+    Ok(list)
+}

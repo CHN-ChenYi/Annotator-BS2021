@@ -1,6 +1,7 @@
 use actix_identity::Identity;
-use actix_web::{get, post, put, delete, web, Error, HttpResponse};
+use actix_web::{delete, get, post, put, web, Error, HttpResponse};
 use log::error;
+use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::actions::*;
@@ -160,4 +161,42 @@ async fn update_task(
         0 => Ok(HttpResponse::Forbidden().finish()),
         _ => Ok(HttpResponse::Ok().finish()),
     }
+}
+
+#[derive(Deserialize)]
+struct GetTaskListQuery {
+    task_type: u8, // 0: owned, 1: claimed, 2: unassigned
+}
+
+#[get("/task-list/all")]
+async fn get_task_list(
+    pool: web::Data<crate::DbPool>,
+    id: Identity,
+    info: web::Query<GetTaskListQuery>,
+) -> Result<HttpResponse, Error> {
+    if id.identity().is_none() {
+        return Ok(HttpResponse::Unauthorized().finish());
+    }
+    let uid = id.identity().unwrap();
+
+    if info.task_type > 2 {
+        return Ok(HttpResponse::BadRequest().body("Unsupported task type"));
+    }
+
+    let tasks = web::block(move || {
+        let conn = pool.get()?;
+        match info.task_type {
+            0 => select_task_list(Some(&uid), None, None, &conn),
+            1 => select_task_list(None, Some(&uid), None, &conn),
+            2 => select_task_list(None, None, Some(&0), &conn),
+            _ => unreachable!(),
+        }
+    })
+    .await
+    .map_err(|e| {
+        error!("{}", e);
+        HttpResponse::InternalServerError().finish()
+    })?;
+
+    Ok(HttpResponse::Ok().json(tasks))
 }

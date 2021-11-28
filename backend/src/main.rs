@@ -69,6 +69,7 @@ async fn main() -> std::io::Result<()> {
                     .service(handlers::claim_task)
                     .service(handlers::revoke_task)
                     .service(handlers::update_task)
+                    .service(handlers::get_task_list)
             )
     })
     .bind(&bind)?

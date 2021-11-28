@@ -11,7 +11,7 @@ pub struct Task {
     pub content: String,
     pub tags: String,
     pub worker: Option<String>,
-    pub status: i8, // 0: pending, 1: accepted, 2: completed, 3: accepted, 4: rejected
+    pub status: i8, // 0: pending, 1: accepted, 2: completed // 3: accepted, 4: rejected
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
 }
@@ -34,4 +34,17 @@ pub struct NewTask {
 pub struct UpdateTask {
     pub content: String,
     pub status: i8,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TaskListEntry {
+    pub id: String,
+    pub owner: String,
+    pub title: String,
+    pub description: String,
+    pub worker: Option<String>,
+    pub status: i8,
+    pub created_at: chrono::NaiveDateTime,
+    pub updated_at: chrono::NaiveDateTime,
+    pub cover_image: String
 }
