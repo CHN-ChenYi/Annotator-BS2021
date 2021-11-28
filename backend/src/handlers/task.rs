@@ -1,5 +1,5 @@
 use actix_identity::Identity;
-use actix_web::{get, post, web, Error, HttpResponse};
+use actix_web::{get, post, delete, web, Error, HttpResponse};
 use log::error;
 use uuid::Uuid;
 
@@ -78,4 +78,58 @@ async fn get_task(
     })?;
 
     Ok(HttpResponse::Ok().json(task))
+}
+
+#[post("/task/{tid}/worker")]
+async fn claim_task(
+    pool: web::Data<crate::DbPool>,
+    id: Identity,
+    tid: web::Path<String>,
+) -> Result<HttpResponse, Error> {
+    if id.identity().is_none() {
+        return Ok(HttpResponse::Unauthorized().finish());
+    }
+    let uid = id.identity().unwrap();
+
+    let affected_rows = web::block(move || {
+        let conn = pool.get()?;
+        claim_task_by_tid_and_uid(&tid, &uid, &conn)
+    })
+    .await
+    .map_err(|e| {
+        error!("{}", e);
+        HttpResponse::InternalServerError().finish()
+    })?;
+
+    match affected_rows {
+        0 => Ok(HttpResponse::BadRequest().body("The task has been claimed")),
+        _ => Ok(HttpResponse::Ok().finish()),
+    }
+}
+
+#[delete("/task/{tid}/worker")]
+async fn revoke_task(
+    pool: web::Data<crate::DbPool>,
+    id: Identity,
+    tid: web::Path<String>,
+) -> Result<HttpResponse, Error> {
+    if id.identity().is_none() {
+        return Ok(HttpResponse::Unauthorized().finish());
+    }
+    let uid = id.identity().unwrap();
+
+    let affected_rows = web::block(move || {
+        let conn = pool.get()?;
+        revoke_task_by_tid_and_uid(&tid, &uid, &conn)
+    })
+    .await
+    .map_err(|e| {
+        error!("{}", e);
+        HttpResponse::InternalServerError().finish()
+    })?;
+
+    match affected_rows {
+        0 => Ok(HttpResponse::Forbidden().finish()),
+        _ => Ok(HttpResponse::Ok().finish()),
+    }
 }

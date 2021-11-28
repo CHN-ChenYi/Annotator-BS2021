@@ -45,11 +45,51 @@ pub fn insert_new_task(
     }
 }
 
-pub fn get_task_by_tid(tid: &str, conn: &MysqlConnection) -> Result<models::Task, DbError> {
+pub fn get_task_by_tid(tid_: &str, conn: &MysqlConnection) -> Result<models::Task, DbError> {
     use crate::schema::tasks::dsl::*;
 
     tasks
-        .filter(id.eq(tid))
+        .filter(id.eq(tid_))
         .first::<models::Task>(conn)
         .map_err(|e| DbError::from(e))
+}
+
+pub fn claim_task_by_tid_and_uid(
+    tid_: &str,
+    uid_: &str,
+    conn: &MysqlConnection,
+) -> Result<usize, DbError> {
+    use crate::schema::tasks::dsl::*;
+
+    let task = tasks.filter(id.eq(tid_)).first::<models::Task>(conn)?;
+
+    if task.worker.is_some() {
+        return Ok(0);
+    }
+
+    let affected_rows = diesel::update(tasks.find(tid_))
+        .set(worker.eq(uid_))
+        .execute(conn)?;
+
+    Ok(affected_rows)
+}
+
+pub fn revoke_task_by_tid_and_uid(
+    tid_: &str,
+    uid_: &str,
+    conn: &MysqlConnection,
+) -> Result<usize, DbError> {
+    use crate::schema::tasks::dsl::*;
+
+    let task = tasks.filter(id.eq(tid_)).first::<models::Task>(conn)?;
+
+    if task.worker != Some(uid_.to_owned()) {
+        return Ok(0);
+    }
+
+    let affected_rows = diesel::update(tasks.find(tid_))
+        .set(worker.eq(None::<String>))
+        .execute(conn)?;
+
+    Ok(affected_rows)
 }
