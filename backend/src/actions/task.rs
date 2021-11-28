@@ -13,8 +13,8 @@ pub fn insert_new_task(
     iids_: &Vec<String>,
     conn: &MysqlConnection,
 ) -> Result<models::Task, DbError> {
-    use crate::schema::tasks::dsl::*;
     use crate::schema::images::dsl::*;
+    use crate::schema::tasks::dsl::*;
 
     let new_task = models::Task {
         id: id_.to_owned(),
@@ -45,10 +45,7 @@ pub fn insert_new_task(
     }
 }
 
-pub fn get_task_by_tid(
-    tid: &str,
-    conn: &MysqlConnection,
-) -> Result<models::Task, DbError> {
+pub fn get_task_by_tid(tid: &str, conn: &MysqlConnection) -> Result<models::Task, DbError> {
     use crate::schema::tasks::dsl::*;
 
     tasks
