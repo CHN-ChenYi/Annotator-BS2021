@@ -200,3 +200,84 @@ async fn get_task_list(
 
     Ok(HttpResponse::Ok().json(tasks))
 }
+
+#[derive(Deserialize)]
+struct ExportTaskListQuery {
+    export_type: u8, // 0: PASCAL VOC, 1: COCO
+}
+
+#[get("/task/{tid}/export")]
+async fn export_task(
+    pool: web::Data<crate::DbPool>,
+    id: Identity,
+    tid: web::Path<String>,
+    info: web::Query<ExportTaskListQuery>,
+) -> Result<HttpResponse, Error> {
+    if id.identity().is_none() {
+        return Ok(HttpResponse::Unauthorized().finish());
+    }
+    let uid = id.identity().unwrap();
+
+    if info.export_type > 1 {
+        return Ok(HttpResponse::BadRequest().body("Unsupported export type"));
+    }
+
+    let task = web::block(move || {
+        let conn = pool.get()?;
+        get_task_by_tid(&tid, &conn)
+    })
+    .await
+    .map_err(|e| {
+        error!("{}", e);
+        HttpResponse::InternalServerError().body(e.to_string())
+    })?;
+
+    if task.owner != uid || task.worker != Some(uid) {
+        return Ok(HttpResponse::Forbidden().finish());
+    }
+
+    Ok(HttpResponse::Ok().into())
+
+    // TODO: finish it
+
+    // let tasks = web::block(move || {
+    //     let conn = pool.get()?;
+    //     match info.task_type {
+    //         0 => select_task_list(Some(&uid), None, None, &conn),
+    //         1 => select_task_list(None, Some(&uid), None, &conn),
+    //         2 => select_task_list(None, None, Some(&0), &conn),
+    //         _ => unreachable!(),
+    //     }
+    // })
+    // .await
+    // .map_err(|e| {
+    //     error!("{}", e);
+    //     HttpResponse::InternalServerError().body(e.to_string())
+    // })?;
+
+    // let mut csv = String::new();
+    // csv.push_str("id,title,description,tags,status,created_at,updated_at\n");
+    // for task in tasks {
+    //     csv.push_str(&format!(
+    //         "{},{},{},{},{},{},{}\n",
+    //         task.tid,
+    //         task.title,
+    //         task.description,
+    //         task.tags,
+    //         task.status,
+    //         task.created_at,
+    //         task.updated_at
+    //     ));
+    // }
+
+    // let mut resp = HttpResponse::Ok();
+    // resp.set_header(
+    //     header::CONTENT_DISPOSITION,
+    //     header::HeaderValue::from_str(&format!("attachment; filename={}", "task.csv")).unwrap(),
+    // );
+    // resp.set_header(header::CONTENT_TYPE, "text/json");
+    // resp.set_header(header::CONTENT_LENGTH, csv.len() as u64);
+    // resp.set_body(csv);
+
+    // Ok(resp)
+}
