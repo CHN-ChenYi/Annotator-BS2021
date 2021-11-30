@@ -1,4 +1,5 @@
 // https://usehooks.com/useAuth/
+import md5 from 'js-md5';
 import axios from 'axios';
 import React, { useState, useContext, createContext } from 'react';
 
@@ -25,7 +26,8 @@ function useProvideAuth() {
         setUser({
           id: response.data.id,
           email: response.data.email,
-          username: response.data.username
+          username: response.data.username,
+          photoURL: `https://www.gravatar.com/avatar/${md5(response.data.email.toLowerCase())}`
         });
       })
       .catch((error) => {
@@ -44,7 +46,8 @@ function useProvideAuth() {
         setUser({
           id: response.data.id,
           email: response.data.email,
-          username: response.data.username
+          username: response.data.username,
+          photoURL: `https://www.gravatar.com/avatar/${md5(response.data.email.toLowerCase())}`
         });
       })
       .catch((error) => {

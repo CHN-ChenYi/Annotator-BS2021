@@ -1,4 +1,3 @@
-import md5 from 'js-md5';
 import { Icon } from '@iconify/react';
 import { useRef, useState } from 'react';
 import homeFill from '@iconify/icons-eva/home-fill';
@@ -10,7 +9,6 @@ import { alpha } from '@mui/material/styles';
 import { Button, Box, Divider, MenuItem, Typography, Avatar, IconButton } from '@mui/material';
 // components
 import MenuPopover from '../../components/MenuPopover';
-//
 // auth
 import { useAuth } from '../../utils/use-auth';
 
@@ -71,10 +69,7 @@ export default function AccountPopover() {
           })
         }}
       >
-        <Avatar
-          src={`https://www.gravatar.com/avatar/${md5(auth.user.email.toLowerCase())}`}
-          alt="photoURL"
-        />
+        <Avatar src={auth.user.photoURL} alt="photoURL" />
       </IconButton>
 
       <MenuPopover
