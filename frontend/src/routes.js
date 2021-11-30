@@ -8,6 +8,7 @@ import LogoOnlyLayout from './layouts/LogoOnlyLayout';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import DashboardApp from './pages/DashboardApp';
+import Gallery from './pages/Gallery';
 import Products from './pages/Products';
 import Blog from './pages/Blog';
 import User from './pages/User';
@@ -26,6 +27,7 @@ export default function Router() {
         { element: <Navigate to="/dashboard/app" replace /> },
         { path: 'app', element: <DashboardApp /> },
         { path: 'user', element: <User /> },
+        { path: 'gallery', element: <Gallery /> },
         { path: 'products', element: <Products /> },
         { path: 'blog', element: <Blog /> }
       ]
