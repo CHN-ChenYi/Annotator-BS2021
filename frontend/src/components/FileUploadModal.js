@@ -1,52 +1,55 @@
 import { useState } from 'react';
 import * as React from 'react';
 import PropTypes from 'prop-types';
-import Backdrop from '@mui/material/Backdrop';
-import Box from '@mui/material/Box';
-import Modal from '@mui/material/Modal';
-import Fade from '@mui/material/Fade';
-import Typography from '@mui/material/Typography';
-// import FileUpload from './FileUpload';
-
-const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 400,
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4
-};
+import { Button, Box, Dialog, DialogTitle, Stack } from '@mui/material';
+import axios from 'axios';
+import FileUpload from './FileUpload';
 
 function FileUploadModal({ open, onClose }) {
   const [files, setFiles] = useState([]);
 
+  const handleUpload = () => {
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i += 1) {
+      formData.append('files', files[i]);
+    }
+    axios
+      .post('http://localhost:8080/api/image/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        withCredentials: true
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    onClose();
+  };
+
   return (
-    <Modal
-      aria-labelledby="transition-modal-title"
-      aria-describedby="transition-modal-description"
-      closeAfterTransition
-      open={open}
-      onClose={onClose}
-      BackdropComponent={Backdrop}
-      BackdropProps={{
-        timeout: 500
-      }}
-    >
-      <Fade in={open}>
-        <Box sx={style}>
-          {/* <FileUpload value={files} onChange={setFiles} />; */}
-          <Typography id="transition-modal-title" variant="h6" component="h2">
-            Text in a modal
-          </Typography>
-          <Typography id="transition-modal-description" sx={{ mt: 2 }}>
-            Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-          </Typography>
-        </Box>
-      </Fade>
-    </Modal>
+    <Dialog open={open} onClose={onClose}>
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        mb={5}
+        sx={{ marginBottom: 0 }}
+      >
+        <DialogTitle>Upload Images</DialogTitle>
+        <Button
+          variant="contained"
+          sx={{
+            marginRight: 3
+          }}
+          onClick={handleUpload}
+        >
+          Upload
+        </Button>
+      </Stack>
+      <Box>
+        <FileUpload value={files} onChange={setFiles} />
+      </Box>
+    </Dialog>
   );
 }
 

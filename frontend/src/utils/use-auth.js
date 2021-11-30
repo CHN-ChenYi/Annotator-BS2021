@@ -18,10 +18,16 @@ function useProvideAuth() {
 
   const signin = (email, password) => {
     axios
-      .post('http://localhost:8080/api/user/login', {
-        email,
-        password
-      })
+      .post(
+        'http://localhost:8080/api/user/login',
+        {
+          email,
+          password
+        },
+        {
+          withCredentials: true
+        }
+      )
       .then((response) => {
         setUser({
           id: response.data.id,
@@ -37,11 +43,17 @@ function useProvideAuth() {
 
   const signup = (email, username, password) => {
     axios
-      .post('http://localhost:8080/api/user', {
-        email,
-        username,
-        password
-      })
+      .post(
+        'http://localhost:8080/api/user',
+        {
+          email,
+          username,
+          password
+        },
+        {
+          withCredentials: true
+        }
+      )
       .then((response) => {
         setUser({
           id: response.data.id,
@@ -56,9 +68,17 @@ function useProvideAuth() {
   };
 
   const signout = () => {
-    axios.post('http://localhost:8080/api/user/logout').catch((error) => {
-      console.log(error);
-    });
+    axios
+      .post(
+        'http://localhost:8080/api/user/logout',
+        {},
+        {
+          withCredentials: true
+        }
+      )
+      .catch((error) => {
+        console.log(error);
+      });
     setUser(false);
   };
 
