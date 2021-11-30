@@ -55,7 +55,7 @@ async fn login_user(
         id.remember(res.id.clone());
         Ok(HttpResponse::Ok().json(res))
     } else {
-        let res = HttpResponse::NotFound().body("username and password doesn't match");
+        let res = HttpResponse::BadRequest().body("username and password doesn't match");
         Ok(res)
     }
 }
