@@ -15,6 +15,7 @@ const FileUpload = ({
   buttonProps,
   disabled,
   maxSize,
+  accept,
   ...options
 }) => {
   const { fileRejections, getRootProps, getInputProps, open } = useDropzone({
@@ -24,7 +25,7 @@ const FileUpload = ({
     onDropAccepted: onChange,
     noClick: true,
     noKeyboard: true,
-    accept: 'image/jpeg'
+    accept
   });
 
   const isFileTooLarge =
@@ -73,10 +74,15 @@ const FileUpload = ({
         <input {...getInputProps()} />
         <Icon
           icon={CloudUploadIcon}
-          sx={{ fontSize: 40 }}
-          color={disabled ? 'disabled' : 'primary'}
+          width={48}
+          height={48}
         />
-        <Typography variant="caption" textAlign="center" sx={{ paddingY: 1 }} {...typographyProps}>
+        <Typography
+          variant="caption"
+          textAlign="center"
+          sx={{ paddingY: 1, marginX: 1 }}
+          {...typographyProps}
+        >
           {title}
         </Typography>
         <Button onClick={open} disabled={disabled} sx={{ marginBottom: 1 }} {...buttonProps}>

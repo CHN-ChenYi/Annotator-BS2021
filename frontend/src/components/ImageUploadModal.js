@@ -2,10 +2,11 @@ import { useState } from 'react';
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import { Button, Box, Dialog, DialogTitle, Stack } from '@mui/material';
-import axios from 'axios';
 import FileUpload from './FileUpload';
+import { useUtils } from '../utils/utils';
 
-function FileUploadModal({ open, onClose }) {
+function ImageUploadModal({ open, onClose }) {
+  const utils = useUtils();
   const [files, setFiles] = useState([]);
 
   const handleUpload = () => {
@@ -13,12 +14,11 @@ function FileUploadModal({ open, onClose }) {
     for (let i = 0; i < files.length; i += 1) {
       formData.append('files', files[i]);
     }
-    axios
-      .post('http://localhost:8080/api/image/upload', formData, {
+    utils.fetch
+      .post('/image/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
-        },
-        withCredentials: true
+        }
       })
       .catch((error) => {
         console.log(error);
@@ -47,15 +47,15 @@ function FileUploadModal({ open, onClose }) {
         </Button>
       </Stack>
       <Box>
-        <FileUpload value={files} onChange={setFiles} />
+        <FileUpload value={files} onChange={setFiles} accept="image/jpeg" />
       </Box>
     </Dialog>
   );
 }
 
-FileUploadModal.propTypes = {
+ImageUploadModal.propTypes = {
   open: PropTypes.bool,
   onClose: PropTypes.func
 };
 
-export default FileUploadModal;
+export default ImageUploadModal;

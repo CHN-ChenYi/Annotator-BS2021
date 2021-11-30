@@ -8,16 +8,21 @@ import plusFill from '@iconify/icons-eva/plus-fill';
 import { Link as RouterLink } from 'react-router-dom';
 import Page from '../components/Page';
 import { ProductSort, ProductList, ProductFilterSidebar } from '../components/_dashboard/products';
-import FileUploadModal from '../components/FileUploadModal';
+import ImageUploadModal from '../components/ImageUploadModal';
+import VideoUploadModal from '../components/VideoUploadModal';
 //
 import PRODUCTS from '../_mocks_/products';
 
 // ----------------------------------------------------------------------
 
 export default function Gallery() {
-  const [upload, setUpload] = useState(false);
-  const handleUpload = () => setUpload(true);
-  const handleUploadClose = () => setUpload(false);
+  const [videoUpload, setVideoUpload] = useState(false);
+  const handleVideoUpload = () => setVideoUpload(true);
+  const handleVideoUploadClose = () => setVideoUpload(false);
+
+  const [imageUpload, setImageUpload] = useState(false);
+  const handleImageUpload = () => setImageUpload(true);
+  const handleImageUploadClose = () => setImageUpload(false);
 
   const [openFilter, setOpenFilter] = useState(false);
 
@@ -56,16 +61,28 @@ export default function Gallery() {
           <Typography variant="h4" gutterBottom>
             Gallery
           </Typography>
-          <Button
-            variant="contained"
-            component={RouterLink}
-            to="#"
-            startIcon={<Icon icon={plusFill} />}
-            onClick={handleUpload}
-          >
-            New Images
-          </Button>
-          <FileUploadModal open={upload} onClose={handleUploadClose} />
+          <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
+            <Button
+              variant="contained"
+              component={RouterLink}
+              to="#"
+              startIcon={<Icon icon={plusFill} />}
+              onClick={handleVideoUpload}
+            >
+              New Videos
+            </Button>
+            <VideoUploadModal open={videoUpload} onClose={handleVideoUploadClose} />
+            <Button
+              variant="contained"
+              component={RouterLink}
+              to="#"
+              startIcon={<Icon icon={plusFill} />}
+              onClick={handleImageUpload}
+            >
+              New Images
+            </Button>
+            <ImageUploadModal open={imageUpload} onClose={handleImageUploadClose} />
+          </Stack>
         </Stack>
 
         <Stack
