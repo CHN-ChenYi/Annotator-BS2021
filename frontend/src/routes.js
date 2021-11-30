@@ -1,4 +1,6 @@
 import { Navigate, useRoutes } from 'react-router-dom';
+// auth
+import { useAuth } from './utils/use-auth';
 // layouts
 import DashboardLayout from './layouts/dashboard';
 import LogoOnlyLayout from './layouts/LogoOnlyLayout';
@@ -14,10 +16,12 @@ import NotFound from './pages/Page404';
 // ----------------------------------------------------------------------
 
 export default function Router() {
+  const auth = useAuth();
+
   return useRoutes([
     {
       path: '/dashboard',
-      element: <DashboardLayout />,
+      element: auth.user ? <DashboardLayout /> : <Navigate to="/login" />,
       children: [
         { element: <Navigate to="/dashboard/app" replace /> },
         { path: 'app', element: <DashboardApp /> },
@@ -28,7 +32,7 @@ export default function Router() {
     },
     {
       path: '/',
-      element: <LogoOnlyLayout />,
+      element: !auth.user ? <LogoOnlyLayout /> : <Navigate to="/dashboard" />,
       children: [
         { path: 'login', element: <Login /> },
         { path: 'register', element: <Register /> },

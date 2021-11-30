@@ -1,3 +1,5 @@
+// auth
+import { ProvideAuth } from './utils/use-auth';
 // routes
 import Router from './routes';
 // theme
@@ -11,11 +13,13 @@ import { BaseOptionChartStyle } from './components/charts/BaseOptionChart';
 
 export default function App() {
   return (
-    <ThemeConfig>
-      <ScrollToTop />
-      <GlobalStyles />
-      <BaseOptionChartStyle />
-      <Router />
-    </ThemeConfig>
+    <ProvideAuth>
+      <ThemeConfig>
+        <ScrollToTop />
+        <GlobalStyles />
+        <BaseOptionChartStyle />
+        <Router />
+      </ThemeConfig>
+    </ProvideAuth>
   );
 }

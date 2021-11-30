@@ -1,3 +1,4 @@
+import md5 from 'js-md5';
 import { Icon } from '@iconify/react';
 import { useRef, useState } from 'react';
 import homeFill from '@iconify/icons-eva/home-fill';
@@ -10,7 +11,8 @@ import { Button, Box, Divider, MenuItem, Typography, Avatar, IconButton } from '
 // components
 import MenuPopover from '../../components/MenuPopover';
 //
-import account from '../../_mocks_/account';
+// auth
+import { useAuth } from '../../utils/use-auth';
 
 // ----------------------------------------------------------------------
 
@@ -35,6 +37,8 @@ const MENU_OPTIONS = [
 // ----------------------------------------------------------------------
 
 export default function AccountPopover() {
+  const auth = useAuth();
+
   const anchorRef = useRef(null);
   const [open, setOpen] = useState(false);
 
@@ -67,7 +71,10 @@ export default function AccountPopover() {
           })
         }}
       >
-        <Avatar src={account.photoURL} alt="photoURL" />
+        <Avatar
+          src={`https://www.gravatar.com/avatar/${md5(auth.user.email.toLowerCase())}`}
+          alt="photoURL"
+        />
       </IconButton>
 
       <MenuPopover
@@ -78,10 +85,10 @@ export default function AccountPopover() {
       >
         <Box sx={{ my: 1.5, px: 2.5 }}>
           <Typography variant="subtitle1" noWrap>
-            {account.displayName}
+            {auth.user.username}
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-            {account.email}
+            {auth.user.email}
           </Typography>
         </Box>
 
@@ -110,7 +117,14 @@ export default function AccountPopover() {
         ))}
 
         <Box sx={{ p: 2, pt: 1.5 }}>
-          <Button fullWidth color="inherit" variant="outlined">
+          <Button
+            fullWidth
+            color="inherit"
+            variant="outlined"
+            onClick={() => {
+              auth.signout();
+            }}
+          >
             Logout
           </Button>
         </Box>
