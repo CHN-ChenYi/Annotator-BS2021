@@ -3659,7 +3659,7 @@ clone-deep@^4.0.1:
     kind-of "^6.0.2"
     shallow-clone "^3.0.0"
 
-clsx@^1.1.1:
+clsx@^1.1.0, clsx@^1.1.1:
   version "1.1.1"
   resolved "https://registry.npmjs.org/clsx/-/clsx-1.1.1.tgz"
   integrity sha512-6/bPho624p3S2pMyvP5kKBPXnI3ufHLObBFCfgx+LkeR5lg2XYy2hqZqUf45ypD8COn2bhgGJSUE+l5dhNBieA==
@@ -8005,6 +8005,14 @@ normalize-url@^3.0.0:
   version "3.3.0"
   resolved "https://registry.npmjs.org/normalize-url/-/normalize-url-3.3.0.tgz"
   integrity sha512-U+JJi7duF1o+u2pynbp2zXDW2/PADgC30f0GsHZtRh+HOcXHnw137TrNlyxxRvWW5fjKd3bcLHPxofWuCjaeZg==
+
+notistack@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.npmmirror.com/notistack/download/notistack-2.0.2.tgz#18361a0ce39d2c2d8c3ef58ae43cf4b30d78b800"
+  integrity sha1-GDYaDOOdLC2MPvWK5Dz0sw14uAA=
+  dependencies:
+    clsx "^1.1.0"
+    hoist-non-react-statics "^3.3.0"
 
 npm-run-path@^2.0.0:
   version "2.0.2"

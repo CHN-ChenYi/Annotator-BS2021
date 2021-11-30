@@ -7,8 +7,8 @@ import { alpha } from '@mui/material/styles';
 import { Button, Box, Divider, MenuItem, Typography, Avatar, IconButton } from '@mui/material';
 // components
 import MenuPopover from '../../components/MenuPopover';
-// auth
-import { useAuth } from '../../utils/use-auth';
+// utils
+import { useUtils } from '../../utils/utils';
 
 // ----------------------------------------------------------------------
 
@@ -23,7 +23,7 @@ const MENU_OPTIONS = [
 // ----------------------------------------------------------------------
 
 export default function AccountPopover() {
-  const auth = useAuth();
+  const utils = useUtils();
 
   const anchorRef = useRef(null);
   const [open, setOpen] = useState(false);
@@ -57,7 +57,7 @@ export default function AccountPopover() {
           })
         }}
       >
-        <Avatar src={auth.user.photoURL} alt="photoURL" />
+        <Avatar src={utils.user.photoURL} alt="photoURL" />
       </IconButton>
 
       <MenuPopover
@@ -68,10 +68,10 @@ export default function AccountPopover() {
       >
         <Box sx={{ my: 1.5, px: 2.5 }}>
           <Typography variant="subtitle1" noWrap>
-            {auth.user.username}
+            {utils.user.username}
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-            {auth.user.email}
+            {utils.user.email}
           </Typography>
         </Box>
 
@@ -105,7 +105,7 @@ export default function AccountPopover() {
             color="inherit"
             variant="outlined"
             onClick={() => {
-              auth.signout();
+              utils.signout();
             }}
           >
             Logout

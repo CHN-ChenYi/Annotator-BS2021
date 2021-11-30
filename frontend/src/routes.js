@@ -1,6 +1,6 @@
 import { Navigate, useRoutes } from 'react-router-dom';
-// auth
-import { useAuth } from './utils/use-auth';
+// utils
+import { useUtils } from './utils/utils';
 // layouts
 import DashboardLayout from './layouts/dashboard';
 import LogoOnlyLayout from './layouts/LogoOnlyLayout';
@@ -17,12 +17,12 @@ import NotFound from './pages/Page404';
 // ----------------------------------------------------------------------
 
 export default function Router() {
-  const auth = useAuth();
+  const utils = useUtils();
 
   return useRoutes([
     {
       path: '/dashboard',
-      element: auth.user ? <DashboardLayout /> : <Navigate to="/login" />,
+      element: utils.user ? <DashboardLayout /> : <Navigate to="/login" />,
       children: [
         { element: <Navigate to="/dashboard/app" replace /> },
         { path: 'app', element: <DashboardApp /> },
@@ -34,7 +34,7 @@ export default function Router() {
     },
     {
       path: '/',
-      element: !auth.user ? <LogoOnlyLayout /> : <Navigate to="/dashboard" />,
+      element: !utils.user ? <LogoOnlyLayout /> : <Navigate to="/dashboard" />,
       children: [
         { path: 'login', element: <Login /> },
         { path: 'register', element: <Register /> },

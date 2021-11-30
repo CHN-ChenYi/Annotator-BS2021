@@ -16,12 +16,12 @@ import {
   FormControlLabel
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
-// auth
-import { useAuth } from '../../../utils/use-auth';
+// utils
+import { useUtils } from '../../../utils/utils';
 // ----------------------------------------------------------------------
 
 export default function LoginForm() {
-  const auth = useAuth();
+  const utils = useUtils();
 
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -39,7 +39,7 @@ export default function LoginForm() {
     },
     validationSchema: LoginSchema,
     onSubmit: () => {
-      auth.signin(values.email, values.password);
+      utils.signin(values.email, values.password);
       navigate('/dashboard', { replace: true });
     }
   });

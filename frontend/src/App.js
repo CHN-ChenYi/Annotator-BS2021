@@ -1,5 +1,6 @@
-// auth
-import { ProvideAuth } from './utils/use-auth';
+import { SnackbarProvider } from 'notistack';
+// utils
+import { ProvideUtils } from './utils/utils';
 // routes
 import Router from './routes';
 // theme
@@ -13,13 +14,15 @@ import { BaseOptionChartStyle } from './components/charts/BaseOptionChart';
 
 export default function App() {
   return (
-    <ProvideAuth>
-      <ThemeConfig>
-        <ScrollToTop />
-        <GlobalStyles />
-        <BaseOptionChartStyle />
-        <Router />
-      </ThemeConfig>
-    </ProvideAuth>
+    <SnackbarProvider maxSnack={3}>
+      <ProvideUtils>
+        <ThemeConfig>
+          <ScrollToTop />
+          <GlobalStyles />
+          <BaseOptionChartStyle />
+          <Router />
+        </ThemeConfig>
+      </ProvideUtils>
+    </SnackbarProvider>
   );
 }

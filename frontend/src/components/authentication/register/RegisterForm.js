@@ -8,12 +8,12 @@ import { useNavigate } from 'react-router-dom';
 // material
 import { Stack, TextField, IconButton, InputAdornment } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
-// auth
-import { useAuth } from '../../../utils/use-auth';
+// utils
+import { useUtils } from '../../../utils/utils';
 // ----------------------------------------------------------------------
 
 export default function RegisterForm() {
-  const auth = useAuth();
+  const utils = useUtils();
 
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -32,7 +32,7 @@ export default function RegisterForm() {
     },
     validationSchema: RegisterSchema,
     onSubmit: () => {
-      auth.signup(values.email, values.username, values.password);
+      utils.signup(values.email, values.username, values.password);
       navigate('/dashboard', { replace: true });
     }
   });
