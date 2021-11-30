@@ -41,7 +41,7 @@ async fn main() -> std::io::Result<()> {
         .expect("Failed to create pool.");
 
     let port = std::env::var("PORT").expect("PORT");
-    let bind = "127.0.0.1:".to_owned() + &port;
+    let bind = "localhost:".to_owned() + &port;
 
     log::info!("Starting server at: {}", &bind);
 
@@ -55,7 +55,12 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .wrap(match cors {
-                true => Cors::default().allow_any_origin().allow_any_method().allow_any_header(),
+                true => Cors::default()
+                    .allow_any_origin()
+                    .allow_any_method()
+                    .allow_any_header()
+                    .supports_credentials()
+                    .expose_any_header(),
                 false => Cors::default(),
             })
             .data(pool.clone())
@@ -63,7 +68,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::Logger::default())
             .wrap(IdentityService::new(
                 CookieIdentityPolicy::new(&private_key)
-                    .name("auth-example")
+                    .name("auth-cookie")
                     .secure(false),
             ))
             .service(
