@@ -30,14 +30,14 @@ pub fn insert_new_user(
 }
 
 pub fn user_login(
-    username_: &str,
+    email_: &str,
     password_: &str,
     conn: &MysqlConnection,
 ) -> Result<Option<models::PublicUser>, DbError> {
     use crate::schema::users::dsl::*;
 
     let user = users
-        .filter(username.eq(username_))
+        .filter(email.eq(email_))
         .first::<models::User>(conn)
         .optional()?
         .unwrap();

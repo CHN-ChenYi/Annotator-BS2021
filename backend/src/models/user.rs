@@ -19,7 +19,7 @@ pub struct NewUser {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ExistUser {
-    pub username: String,
+    pub email: String,
     pub password: String,
 }
 

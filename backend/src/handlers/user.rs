@@ -43,7 +43,7 @@ async fn login_user(
 ) -> Result<HttpResponse, Error> {
     let user = web::block(move || {
         let conn = pool.get()?;
-        user_login(&form.username, &form.password, &conn)
+        user_login(&form.email, &form.password, &conn)
     })
     .await
     .map_err(|e| {
