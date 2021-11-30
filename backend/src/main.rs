@@ -5,6 +5,7 @@ extern crate env_logger;
 extern crate log;
 extern crate threadpool;
 
+use actix_cors::Cors;
 use actix_files::Files;
 use actix_identity::{CookieIdentityPolicy, IdentityService};
 use actix_web::{middleware, web, App, HttpServer};
@@ -39,14 +40,24 @@ async fn main() -> std::io::Result<()> {
         .build(manager)
         .expect("Failed to create pool.");
 
-    let bind = "127.0.0.1:8080";
+    let port = std::env::var("PORT").expect("PORT");
+    let bind = "127.0.0.1:".to_owned() + &port;
 
     log::info!("Starting server at: {}", &bind);
 
     let private_key = rand::thread_rng().gen::<[u8; 32]>();
 
+    let cors = match std::str::FromStr::from_str(&std::env::var("CORS").expect("CORS")) {
+        Ok(true) => true,
+        _ => false,
+    };
+
     HttpServer::new(move || {
         App::new()
+            .wrap(match cors {
+                true => Cors::default().allow_any_origin().allow_any_method().allow_any_header(),
+                false => Cors::default(),
+            })
             .data(pool.clone())
             .data(threadpool::ThreadPool::new(1))
             .wrap(middleware::Logger::default())
@@ -70,7 +81,7 @@ async fn main() -> std::io::Result<()> {
                     .service(handlers::revoke_task)
                     .service(handlers::update_task)
                     .service(handlers::get_task_list)
-                    .service(handlers::export_task)
+                    .service(handlers::export_task),
             )
     })
     .bind(&bind)?
