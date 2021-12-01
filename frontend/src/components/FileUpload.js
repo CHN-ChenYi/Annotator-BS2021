@@ -72,11 +72,7 @@ const FileUpload = ({
         }}
       >
         <input {...getInputProps()} />
-        <Icon
-          icon={CloudUploadIcon}
-          width={48}
-          height={48}
-        />
+        <Icon icon={CloudUploadIcon} width={48} height={48} />
         <Typography
           variant="caption"
           textAlign="center"

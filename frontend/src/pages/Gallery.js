@@ -1,5 +1,4 @@
-import { useFormik } from 'formik';
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 // material
 import { Container, Button, Stack, Typography } from '@mui/material';
 // components
@@ -7,52 +6,67 @@ import { Icon } from '@iconify/react';
 import plusFill from '@iconify/icons-eva/plus-fill';
 import { Link as RouterLink } from 'react-router-dom';
 import Page from '../components/Page';
-import { ProductSort, ProductList, ProductFilterSidebar } from '../components/_dashboard/products';
+import { ImageList, ImageCartWidget } from '../components/_dashboard/gallery';
 import ImageUploadModal from '../components/ImageUploadModal';
 import VideoUploadModal from '../components/VideoUploadModal';
-//
-import PRODUCTS from '../_mocks_/products';
+import TaskCreateModal from '../components/TaskCreateModal';
+import { useUtils } from '../utils/utils';
 
 // ----------------------------------------------------------------------
 
 export default function Gallery() {
+  const utils = useUtils();
+
   const [videoUpload, setVideoUpload] = useState(false);
   const handleVideoUpload = () => setVideoUpload(true);
-  const handleVideoUploadClose = () => setVideoUpload(false);
+  const handleVideoUploadClose = () => {
+    setVideoUpload(false);
+    refresh();
+  };
 
   const [imageUpload, setImageUpload] = useState(false);
   const handleImageUpload = () => setImageUpload(true);
-  const handleImageUploadClose = () => setImageUpload(false);
+  const handleImageUploadClose = () => {
+    setImageUpload(false);
+    refresh();
+  };
 
-  const [openFilter, setOpenFilter] = useState(false);
-
-  const formik = useFormik({
-    initialValues: {
-      gender: '',
-      category: '',
-      colors: '',
-      priceRange: '',
-      rating: ''
-    },
-    onSubmit: () => {
-      setOpenFilter(false);
+  const [selectedImageNum, setSelectedImageNum] = useState(0);
+  const [selectedImage, setSelectedImage] = useState([]);
+  const handleSelectStateSwitch = (index, imageName) => {
+    if (!imageName) {
+      if (selectedImage[index]) setSelectedImageNum(selectedImageNum - 1);
+      selectedImage[index] = undefined;
+      setSelectedImage(selectedImage);
+    } else {
+      if (!selectedImage[index]) setSelectedImageNum(selectedImageNum + 1);
+      selectedImage[index] = imageName;
+      setSelectedImage(selectedImage);
     }
-  });
-
-  const { resetForm, handleSubmit } = formik;
-
-  const handleOpenFilter = () => {
-    setOpenFilter(true);
   };
 
-  const handleCloseFilter = () => {
-    setOpenFilter(false);
+  const [taskCreate, setTaskCreate] = useState(false);
+  const handleTaskCreate = () => setTaskCreate(true);
+  const handleTaskCreateClose = () => {
+    setTaskCreate(false);
+    refresh();
   };
 
-  const handleResetFilter = () => {
-    handleSubmit();
-    resetForm();
+  const [imageList, setImageList] = useState([]);
+  const updateImageList = () => {
+    utils.fetch.get('/image/all').then((res) => setImageList(res.data));
   };
+
+  const refresh = () => {
+    setSelectedImageNum(0);
+    setSelectedImage([]);
+    updateImageList();
+  };
+
+  useEffect(() => {
+    updateImageList();
+    // eslint-disable-next-line
+  }, []);
 
   return (
     <Page title="Gallery | Annotator">
@@ -85,26 +99,14 @@ export default function Gallery() {
           </Stack>
         </Stack>
 
-        <Stack
-          direction="row"
-          flexWrap="wrap-reverse"
-          alignItems="center"
-          justifyContent="flex-end"
-          sx={{ mb: 5 }}
-        >
-          <Stack direction="row" spacing={1} flexShrink={0} sx={{ my: 1 }}>
-            <ProductFilterSidebar
-              formik={formik}
-              isOpenFilter={openFilter}
-              onResetFilter={handleResetFilter}
-              onOpenFilter={handleOpenFilter}
-              onCloseFilter={handleCloseFilter}
-            />
-            <ProductSort />
-          </Stack>
-        </Stack>
-
-        <ProductList products={PRODUCTS} />
+        <ImageList images={imageList} onSwitch={handleSelectStateSwitch} />
+        <ImageCartWidget content={selectedImageNum} handleClick={handleTaskCreate} />
+        <TaskCreateModal
+          open={taskCreate}
+          onClose={handleTaskCreateClose}
+          selectedImage={selectedImage}
+          imageList={imageList}
+        />
       </Container>
     </Page>
   );
