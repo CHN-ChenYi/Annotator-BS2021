@@ -4,7 +4,7 @@ import { useState } from 'react';
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import { Button, Dialog, DialogTitle, Stack, TextField, Autocomplete } from '@mui/material';
-import { useUtils } from '../utils/utils';
+import { useUtils } from '../../../utils/utils';
 
 function TaskCreateModal({ open, onClose, selectedImage, imageList }) {
   const utils = useUtils();
@@ -84,6 +84,7 @@ function TaskCreateModal({ open, onClose, selectedImage, imageList }) {
             fullWidth
             label="Description"
             multiline
+            minRows={4}
             {...getFieldProps('description')}
             error={Boolean(touched.description && errors.description)}
             helperText={touched.description && errors.description}

@@ -9,10 +9,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import DashboardApp from './pages/DashboardApp';
 import Gallery from './pages/Gallery';
-import Products from './pages/Products';
 import Task from './pages/Task';
 import TaskEdit from './pages/TaskEdit';
-import User from './pages/User';
 import NotFound from './pages/Page404';
 
 // ----------------------------------------------------------------------
@@ -27,9 +25,7 @@ export default function Router() {
       children: [
         { element: <Navigate to="/dashboard/app" replace /> },
         { path: 'app', element: <DashboardApp /> },
-        { path: 'user', element: <User /> },
         { path: 'gallery', element: <Gallery /> },
-        { path: 'products', element: <Products /> },
         { path: 'owned', element: <Task taskType={0} /> },
         { path: 'claimed', element: <Task taskType={1} /> },
         { path: 'free', element: <Task taskType={2} /> },

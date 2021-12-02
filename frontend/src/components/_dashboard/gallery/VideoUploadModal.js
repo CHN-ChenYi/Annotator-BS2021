@@ -5,7 +5,7 @@ import * as React from 'react';
 import PropTypes from 'prop-types';
 import { Button, Box, Dialog, DialogTitle, Stack, TextField } from '@mui/material';
 import FileUpload from './FileUpload';
-import { useUtils } from '../utils/utils';
+import { useUtils } from '../../../utils/utils';
 
 function VideoUploadModal({ open, onClose }) {
   const utils = useUtils();

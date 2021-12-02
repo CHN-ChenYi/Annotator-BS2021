@@ -6,10 +6,13 @@ import { Icon } from '@iconify/react';
 import plusFill from '@iconify/icons-eva/plus-fill';
 import { Link as RouterLink } from 'react-router-dom';
 import Page from '../components/Page';
-import { ImageList, ImageCartWidget } from '../components/_dashboard/gallery';
-import ImageUploadModal from '../components/ImageUploadModal';
-import VideoUploadModal from '../components/VideoUploadModal';
-import TaskCreateModal from '../components/TaskCreateModal';
+import {
+  ImageList,
+  ImageCartWidget,
+  ImageUploadModal,
+  VideoUploadModal,
+  TaskCreateModal
+} from '../components/_dashboard/gallery';
 import { useUtils } from '../utils/utils';
 
 // ----------------------------------------------------------------------
