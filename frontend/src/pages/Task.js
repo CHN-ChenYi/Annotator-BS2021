@@ -1,24 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Icon } from '@iconify/react';
-import plusFill from '@iconify/icons-eva/plus-fill';
-import { Link as RouterLink } from 'react-router-dom';
-import ReactImageAnnotate from 'react-image-annotate';
 // material
-import { Grid, Button, Container, Stack, Typography, Box } from '@mui/material';
+import { Grid, Container, Stack, Typography } from '@mui/material';
 // components
 import Page from '../components/Page';
-import { TaskCard, TaskPostsSort, TaskPostsSearch } from '../components/_dashboard/task';
+import { TaskCard } from '../components/_dashboard/task';
 //
-import POSTS from '../_mocks_/blog';
 import { useUtils } from '../utils/utils';
-
-// ----------------------------------------------------------------------
-
-const SORT_OPTIONS = [
-  { value: 'latest', label: 'Latest' },
-  { value: 'popular', label: 'Popular' },
-  { value: 'oldest', label: 'Oldest' }
-];
 
 // ----------------------------------------------------------------------
 
@@ -27,7 +14,6 @@ export default function Task(taskType) {
 
   const [taskList, setTaskList] = useState([]);
   const updateTaskList = () => {
-    console.log(taskType);
     utils.fetch
       .get('/task-list/all', { params: { task_type: taskType.taskType } })
       .then((res) => setTaskList(res.data));
@@ -38,12 +24,17 @@ export default function Task(taskType) {
     // eslint-disable-next-line
   }, [taskType]);
 
+  let pageTitle = 'Tasks';
+  if (taskType.taskType === 0) pageTitle = 'Owned Tasks';
+  else if (taskType.taskType === 1) pageTitle = 'Claimed Tasks';
+  else pageTitle = 'Tasks to be Claimed';
+
   return (
-    <Page title="Task | Annotator">
+    <Page title={`${pageTitle} | Annotator`}>
       <Container>
         <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
           <Typography variant="h4" gutterBottom>
-            Task
+            {pageTitle}
           </Typography>
         </Stack>
 

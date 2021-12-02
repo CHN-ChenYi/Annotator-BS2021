@@ -1,23 +1,19 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Icon } from '@iconify/react';
-import eyeFill from '@iconify/icons-eva/eye-fill';
 import codeDownloadFill from '@iconify/icons-eva/code-download-fill';
 import personDeleteFill from '@iconify/icons-eva/person-delete-fill';
 import editFill from '@iconify/icons-eva/edit-fill';
-import { Link as RouterLink } from 'react-router-dom';
-import shareFill from '@iconify/icons-eva/share-fill';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import checkMarkCircleFill from '@iconify/icons-eva/checkmark-circle-fill';
-import messageCircleFill from '@iconify/icons-eva/message-circle-fill';
 // material
 import { alpha, styled } from '@mui/material/styles';
-import { Box, Link, Card, Grid, Avatar, Typography, CardContent, IconButton } from '@mui/material';
+import { Link, Card, Grid, Avatar, Typography, CardContent, IconButton } from '@mui/material';
 // utils
 import { fDate } from '../../../utils/formatTime';
-import { fShortenNumber } from '../../../utils/formatNumber';
 //
 import SvgIconStyle from '../../SvgIconStyle';
-import { TaskModal, TaskDescriptionModal } from '.';
+import { TaskDescriptionModal } from '.';
 import { useUtils } from '../../../utils/utils';
 
 // ----------------------------------------------------------------------
@@ -69,12 +65,7 @@ TaskCard.propTypes = {
 
 export default function TaskCard({ task, index, taskType, updateTaskList }) {
   const utils = useUtils();
-
-  const [taskEdit, setTaskEdit] = useState(false);
-  const handleTaskEdit = () => setTaskEdit(true);
-  const handleTaskEditClose = () => {
-    setTaskEdit(false);
-  };
+  const navigate = useNavigate();
 
   const [descriptionOpen, setDescriptionOpen] = useState(false);
   const handleDescriptionOpen = () => setDescriptionOpen(true);
@@ -200,7 +191,12 @@ export default function TaskCard({ task, index, taskType, updateTaskList }) {
             )}
             {(taskType.taskType === 0 || taskType.taskType === 1) && (
               <IconButton>
-                <Icon icon={editFill} onClick={handleTaskEdit} />
+                <Icon
+                  icon={editFill}
+                  onClick={() => {
+                    navigate(`/dashboard/task/${task.id}`);
+                  }}
+                />
               </IconButton>
             )}
             {taskType.taskType === 2 && (
@@ -216,7 +212,6 @@ export default function TaskCard({ task, index, taskType, updateTaskList }) {
                 />
               </IconButton>
             )}
-            <TaskModal open={taskEdit} onClose={handleTaskEditClose} />
           </InfoStyle>
         </CardContent>
       </Card>

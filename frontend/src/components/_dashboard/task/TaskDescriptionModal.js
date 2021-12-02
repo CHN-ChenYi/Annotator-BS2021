@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Typography, Box, Dialog, Slide, DialogTitle, Stack } from '@mui/material';
+import { Typography, Box, Dialog } from '@mui/material';
 import { fDate } from '../../../utils/formatTime';
 
 export default function TaskDescriptionModal({ open, onClose, task, taskType }) {

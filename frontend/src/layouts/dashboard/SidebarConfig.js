@@ -2,7 +2,6 @@ import { Icon } from '@iconify/react';
 import pieChart2Fill from '@iconify/icons-eva/pie-chart-2-fill';
 import peopleFill from '@iconify/icons-eva/people-fill';
 import shoppingBagFill from '@iconify/icons-eva/shopping-bag-fill';
-import fileTextFill from '@iconify/icons-eva/file-text-fill';
 import imageFill from '@iconify/icons-eva/image-fill';
 import folderAddFill from '@iconify/icons-eva/folder-add-fill';
 import folderRemoveFill from '@iconify/icons-eva/folder-remove-fill';
