@@ -7,7 +7,6 @@ import LogoOnlyLayout from './layouts/LogoOnlyLayout';
 //
 import Login from './pages/Login';
 import Register from './pages/Register';
-import DashboardApp from './pages/DashboardApp';
 import Gallery from './pages/Gallery';
 import Task from './pages/Task';
 import TaskEdit from './pages/TaskEdit';
@@ -23,8 +22,7 @@ export default function Router() {
       path: '/dashboard',
       element: utils.user ? <DashboardLayout /> : <Navigate to="/login" />,
       children: [
-        { element: <Navigate to="/dashboard/app" replace /> },
-        { path: 'app', element: <DashboardApp /> },
+        { element: <Navigate to="/dashboard/gallery" replace /> },
         { path: 'gallery', element: <Gallery /> },
         { path: 'owned', element: <Task taskType={0} /> },
         { path: 'claimed', element: <Task taskType={1} /> },

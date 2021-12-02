@@ -23,7 +23,9 @@ function ImageUploadModal({ open, onClose }) {
       .catch((error) => {
         console.log(error);
       });
-    onClose();
+    new Promise((resolve) => setTimeout(resolve, 300)).then(() => {
+      onClose();
+    });
   };
 
   return (

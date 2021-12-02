@@ -40,7 +40,9 @@ function VideoUploadModal({ open, onClose }) {
         .catch((error) => {
           console.log(error);
         });
-      onClose();
+      new Promise((resolve) => setTimeout(resolve, 1000)).then(() => {
+        onClose();
+      });
     }
   });
 

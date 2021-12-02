@@ -28,7 +28,7 @@ const useProvideUtils = () => {
   fetch.interceptors.response.use(
     (response) => response,
     (error) => {
-      if (error.response) alertBySnackbar(error.response.data, 'error');
+      if (error.response && error.response.data) alertBySnackbar(error.response.data, 'error');
       else alertBySnackbar(error.message, 'error');
       return error;
     }

@@ -175,7 +175,14 @@ export default function TaskCard({ task, index, taskType, updateTaskList }) {
           <InfoStyle>
             {taskType.taskType === 0 && task.status === 2 && (
               <IconButton>
-                <Icon icon={codeDownloadFill} />
+                <Icon
+                  icon={codeDownloadFill}
+                  onClick={() => {
+                    // TODO
+                    console.log('unimplemented');
+                    utils.alertBySnackbar('Unimplemented', 'info');
+                  }}
+                />
               </IconButton>
             )}
             {taskType.taskType === 0 && task.worker && (

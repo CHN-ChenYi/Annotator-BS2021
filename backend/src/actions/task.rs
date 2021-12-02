@@ -106,7 +106,7 @@ pub fn update_task_by_tid(
 
     let task = tasks.filter(id.eq(tid_)).first::<models::Task>(conn)?;
 
-    if task.worker != Some(uid_.to_owned()) || task.owner != uid_.to_owned() {
+    if task.worker != Some(uid_.to_owned()) && task.owner != uid_.to_owned() {
         return Ok(0);
     }
 

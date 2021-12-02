@@ -63,6 +63,5 @@ async fn login_user(
 #[post("/user/logout")]
 async fn logout_user(_: web::Data<crate::DbPool>, id: Identity) -> Result<HttpResponse, Error> {
     id.forget();
-    let res = HttpResponse::Found().header("location", "/").finish();
-    Ok(res)
+    Ok(HttpResponse::Ok().into())
 }
