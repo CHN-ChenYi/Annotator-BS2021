@@ -54,3 +54,22 @@ pub fn user_login(
         Ok(None)
     }
 }
+
+pub fn get_user_by_id(
+    id_: &str,
+    conn: &MysqlConnection,
+) -> Result<Option<models::PublicUser>, DbError> {
+    use crate::schema::users::dsl::*;
+
+    let user = users
+        .filter(id.eq(id_))
+        .first::<models::User>(conn)
+        .optional()?
+        .unwrap();
+
+    Ok(Some(models::PublicUser {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+    }))
+}

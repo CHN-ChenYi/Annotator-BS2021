@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::schema::tasks;
+use crate::models;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable)]
 pub struct Task {
@@ -39,10 +40,10 @@ pub struct UpdateTask {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TaskListEntry {
     pub id: String,
-    pub owner: String,
+    pub owner: models::PublicUser,
     pub title: String,
     pub description: String,
-    pub worker: Option<String>,
+    pub worker: Option<models::PublicUser>,
     pub status: i8,
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,

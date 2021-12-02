@@ -28,7 +28,7 @@ async fn new_task(
             content.push_str(",");
         }
         content.push_str("{");
-        content.push_str(format!("\"src\":\"http:/localhost:8080/api/image/{}.jpg\",", image.iid).as_str());
+        content.push_str(format!("\"src\":\"http://localhost:8080/api/image/{}.jpg\",", image.iid).as_str());
         content.push_str(format!("\"name\":\"{}\",", image.name).as_str());
         content.push_str("\"regions\":[]}");
 

@@ -1,5 +1,6 @@
 use diesel::prelude::*;
 
+use crate::actions;
 use crate::models;
 use crate::DbError;
 
@@ -105,7 +106,7 @@ pub fn update_task_by_tid(
 
     let task = tasks.filter(id.eq(tid_)).first::<models::Task>(conn)?;
 
-    if task.worker != Some(uid_.to_owned()) {
+    if task.worker != Some(uid_.to_owned()) || task.owner != uid_.to_owned() {
         return Ok(0);
     }
 
@@ -142,28 +143,31 @@ pub fn select_task_list(
     } else if let Some(worker__) = worker_ {
         query = query.filter(worker.eq(worker__));
     } else if let Some(status__) = status_ {
-        query = query
-            .filter(status.eq(status__))
-            .filter(worker.is_null());
+        query = query.filter(status.eq(status__)).filter(worker.is_null());
     }
 
     let result = query.order(updated_at.desc()).load::<models::Task>(conn)?;
 
     let mut list: Vec<models::TaskListEntry> = Vec::new();
     for row in result.iter() {
-        let cover_image_ = format!(
-            "/api/image/{}.jpg",
-            images
-                .filter(tid.eq(row.id.to_owned()))
-                .first::<models::Image>(conn)?
-                .id
-        );
+        let cover_image_ = images
+            .filter(tid.eq(row.id.to_owned()))
+            .first::<models::Image>(conn)?
+            .id;
+        let owner_pub = actions::get_user_by_id(&row.owner, conn)?.unwrap();
+        let worker_pub = match &row.worker {
+            Some(worker__) => match actions::get_user_by_id(&worker__, conn)? {
+                Some(user) => Some(user),
+                None => None,
+            },
+            None => None,
+        };
         list.push(models::TaskListEntry {
             id: row.id.to_owned(),
-            owner: row.owner.to_owned(),
+            owner: owner_pub.to_owned(),
             title: row.title.to_owned(),
             description: row.description.to_owned(),
-            worker: row.worker.to_owned(),
+            worker: worker_pub.to_owned(),
             status: row.status,
             created_at: row.created_at,
             updated_at: row.updated_at,
