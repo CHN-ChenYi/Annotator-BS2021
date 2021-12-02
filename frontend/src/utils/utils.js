@@ -34,6 +34,10 @@ const useProvideUtils = () => {
     }
   );
 
+  const getAvatar = (email) => `https://www.gravatar.com/avatar/${md5(email.toLowerCase())}`;
+
+  const getImage = (image) => `http://localhost:8080/api/image/${image}.jpg`;
+
   const [user, setUser] = useState(null);
 
   const signin = (email, password) => {
@@ -47,7 +51,7 @@ const useProvideUtils = () => {
           id: response.data.id,
           email: response.data.email,
           username: response.data.username,
-          photoURL: `https://www.gravatar.com/avatar/${md5(response.data.email.toLowerCase())}`
+          photoURL: getAvatar(response.data.email)
         });
       })
       .catch((error) => {
@@ -67,7 +71,7 @@ const useProvideUtils = () => {
           id: response.data.id,
           email: response.data.email,
           username: response.data.username,
-          photoURL: `https://www.gravatar.com/avatar/${md5(response.data.email.toLowerCase())}`
+          photoURL: getAvatar(response.data.email)
         });
       })
       .catch((error) => {
@@ -82,5 +86,5 @@ const useProvideUtils = () => {
     setUser(false);
   };
 
-  return { fetch, alertBySnackbar, user, signin, signup, signout };
+  return { fetch, alertBySnackbar, getAvatar, getImage, user, signin, signup, signout };
 };

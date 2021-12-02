@@ -4,6 +4,9 @@ import peopleFill from '@iconify/icons-eva/people-fill';
 import shoppingBagFill from '@iconify/icons-eva/shopping-bag-fill';
 import fileTextFill from '@iconify/icons-eva/file-text-fill';
 import imageFill from '@iconify/icons-eva/image-fill';
+import folderAddFill from '@iconify/icons-eva/folder-add-fill';
+import folderRemoveFill from '@iconify/icons-eva/folder-remove-fill';
+import folderFill from '@iconify/icons-eva/folder-fill';
 
 // ----------------------------------------------------------------------
 
@@ -31,9 +34,19 @@ const sidebarConfig = [
     icon: getIcon(shoppingBagFill)
   },
   {
-    title: 'blog',
-    path: '/dashboard/blog',
-    icon: getIcon(fileTextFill)
+    title: 'owned tasks',
+    path: '/dashboard/owned',
+    icon: getIcon(folderAddFill)
+  },
+  {
+    title: 'claimed tasks',
+    path: '/dashboard/claimed',
+    icon: getIcon(folderRemoveFill)
+  },
+  {
+    title: 'tasks to be claimed',
+    path: '/dashboard/free',
+    icon: getIcon(folderFill)
   }
 ];
 

@@ -82,7 +82,7 @@ function TaskCreateModal({ open, onClose, selectedImage, imageList }) {
 
           <TextField
             fullWidth
-            label="Description (in Markdown)"
+            label="Description"
             multiline
             {...getFieldProps('description')}
             error={Boolean(touched.description && errors.description)}

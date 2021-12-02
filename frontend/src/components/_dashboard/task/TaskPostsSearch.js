@@ -36,11 +36,11 @@ const RootStyle = styled('div')(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
-BlogPostsSearch.propTypes = {
+TaskPostsSearch.propTypes = {
   posts: PropTypes.array.isRequired
 };
 
-export default function BlogPostsSearch({ posts }) {
+export default function TaskPostsSearch({ posts }) {
   return (
     <RootStyle>
       <Autocomplete
