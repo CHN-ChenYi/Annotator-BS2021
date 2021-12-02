@@ -22,7 +22,7 @@ async fn new_task(
 
     let mut content = String::new();
     let mut iids: Vec<String> = Vec::new();
-    content.push_str("{[");
+    content.push_str("[");
     for (idx, image) in form.images.iter().enumerate() {
         if idx > 0 {
             content.push_str(",");
@@ -34,7 +34,7 @@ async fn new_task(
 
         iids.push(image.iid.to_owned());
     }
-    content.push_str("]}");
+    content.push_str("]");
 
     let _task = web::block(move || {
         let conn = pool.get()?;

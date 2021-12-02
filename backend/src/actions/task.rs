@@ -69,7 +69,7 @@ pub fn claim_task_by_tid_and_uid(
     }
 
     let affected_rows = diesel::update(tasks.find(tid_))
-        .set(worker.eq(uid_))
+        .set((worker.eq(uid_), status.eq(1)))
         .execute(conn)?;
 
     Ok(affected_rows)
@@ -89,7 +89,7 @@ pub fn revoke_task_by_tid_and_uid(
     }
 
     let affected_rows = diesel::update(tasks.find(tid_))
-        .set(worker.eq(None::<String>))
+        .set((worker.eq(None::<String>), status.eq(0)))
         .execute(conn)?;
 
     Ok(affected_rows)
