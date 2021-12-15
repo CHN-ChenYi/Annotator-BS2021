@@ -28,6 +28,17 @@ export default function Task(taskType) {
     // eslint-disable-next-line
   }, [taskType]);
 
+  const [selectedImage, setSelectedImage] = useState(0);
+
+  const handleNext = () => {
+    if (selectedImage === JSON.parse(task.content).length - 1) return;
+    setSelectedImage(selectedImage + 1);
+  };
+  const handlePrev = () => {
+    if (selectedImage === 0) return;
+    setSelectedImage(selectedImage - 1);
+  };
+
   const [e, setE] = useState();
   const submit = (status_) => {
     utils.fetch.put(`/task/${tid}`, {
@@ -53,6 +64,9 @@ export default function Task(taskType) {
                 setE(e);
                 handleSave();
               }}
+              selectedImage={selectedImage}
+              onNextImage={handleNext}
+              onPrevImage={handlePrev}
               images={JSON.parse(task.content)}
             />
           )}
