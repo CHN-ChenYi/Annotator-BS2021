@@ -8,13 +8,25 @@ import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import checkMarkCircleFill from '@iconify/icons-eva/checkmark-circle-fill';
 // material
 import { alpha, styled } from '@mui/material/styles';
-import { Link, Card, Grid, Avatar, Typography, CardContent, IconButton } from '@mui/material';
+import {
+  Dialog,
+  Button,
+  DialogActions,
+  Link,
+  Card,
+  Grid,
+  Avatar,
+  Typography,
+  CardContent,
+  IconButton
+} from '@mui/material';
 // utils
 import { fDate } from '../../../utils/formatTime';
 //
 import SvgIconStyle from '../../SvgIconStyle';
 import { TaskDescriptionModal } from '.';
 import { useUtils } from '../../../utils/utils';
+import { exportCOCO, exportVOC } from './TaskExport';
 
 // ----------------------------------------------------------------------
 
@@ -74,6 +86,10 @@ export default function TaskCard({ task, index, taskType, updateTaskList }) {
   // const { id, owner, title, description, worker, status, createdAt, updatedAt, coverImage } = task;
   const latestTaskLarge = index === 0;
   const latestTask = index === 1 || index === 2;
+
+  const [download, setDownload] = useState(false);
+  const handleDownload = () => setDownload(true);
+  const handleDownloadClose = () => setDownload(false);
 
   return (
     <Grid item xs={12} sm={latestTaskLarge ? 12 : 6} md={latestTaskLarge ? 6 : 3}>
@@ -172,51 +188,73 @@ export default function TaskCard({ task, index, taskType, updateTaskList }) {
             taskType={taskType}
           />
 
+          {taskType.taskType === 0 && task.status === 2 && (
+            <Dialog open={download} onClose={handleDownloadClose}>
+              <DialogActions>
+                <Button
+                  variant="contained"
+                  sx={{
+                    margin: 2
+                  }}
+                  onClick={() => {
+                    utils.fetch.get(`/task/${task.id}`).then((res) => {
+                      exportCOCO(task, res.data);
+                    });
+                  }}
+                >
+                  Coco Format
+                </Button>
+                <Button
+                  variant="contained"
+                  sx={{
+                    margin: 2
+                  }}
+                  onClick={() => {
+                    utils.fetch.get(`/task/${task.id}`).then((res) => {
+                      exportVOC(task, res.data);
+                    });
+                  }}
+                >
+                  Pascal Voc Format
+                </Button>
+              </DialogActions>
+            </Dialog>
+          )}
           <InfoStyle>
             {taskType.taskType === 0 && task.status === 2 && (
-              <IconButton>
-                <Icon
-                  icon={codeDownloadFill}
-                  onClick={() => {
-                    // TODO
-                    console.log('unimplemented');
-                    utils.alertBySnackbar('Unimplemented', 'info');
-                  }}
-                />
+              <IconButton onClick={handleDownload}>
+                <Icon icon={codeDownloadFill} />
               </IconButton>
             )}
             {taskType.taskType === 0 && task.worker && (
-              <IconButton>
-                <Icon
-                  icon={personDeleteFill}
-                  onClick={() => {
-                    utils.fetch.delete(`/task/${task.id}/worker`);
-                    updateTaskList();
-                  }}
-                />
+              <IconButton
+                onClick={() => {
+                  utils.fetch.delete(`/task/${task.id}/worker`);
+                  updateTaskList();
+                }}
+              >
+                <Icon icon={personDeleteFill} />
               </IconButton>
             )}
             {(taskType.taskType === 0 || taskType.taskType === 1) && (
-              <IconButton>
-                <Icon
-                  icon={editFill}
-                  onClick={() => {
-                    navigate(`/dashboard/task/${task.id}`);
-                  }}
-                />
+              <IconButton
+                onClick={() => {
+                  navigate(`/dashboard/task/${task.id}`);
+                }}
+              >
+                <Icon icon={editFill} />
               </IconButton>
             )}
             {taskType.taskType === 2 && (
-              <IconButton>
-                <Icon
-                  icon={checkMarkCircleFill}
-                  onClick={() => {
-                    utils.fetch.post(`/task/${task.id}/worker`);
-                    new Promise((resolve) => setTimeout(resolve, 300)).then(() => {
-                      updateTaskList();
-                    });
-                  }}
-                />
+              <IconButton
+                onClick={() => {
+                  utils.fetch.post(`/task/${task.id}/worker`);
+                  new Promise((resolve) => setTimeout(resolve, 300)).then(() => {
+                    updateTaskList();
+                  });
+                }}
+              >
+                <Icon icon={checkMarkCircleFill} />
               </IconButton>
             )}
           </InfoStyle>

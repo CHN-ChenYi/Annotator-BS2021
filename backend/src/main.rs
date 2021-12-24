@@ -4,6 +4,7 @@ extern crate chrono;
 extern crate env_logger;
 extern crate log;
 extern crate threadpool;
+extern crate imagesize;
 
 use actix_cors::Cors;
 use actix_files::Files;
@@ -86,7 +87,6 @@ async fn main() -> std::io::Result<()> {
                     .service(handlers::revoke_task)
                     .service(handlers::update_task)
                     .service(handlers::get_task_list)
-                    .service(handlers::export_task),
             )
     })
     .bind(&bind)?

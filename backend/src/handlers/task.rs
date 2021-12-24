@@ -1,5 +1,6 @@
 use actix_identity::Identity;
 use actix_web::{delete, get, post, put, web, Error, HttpResponse};
+use imagesize::size;
 use log::error;
 use serde::Deserialize;
 use uuid::Uuid;
@@ -20,6 +21,8 @@ async fn new_task(
 
     let tid = Uuid::new_v4().to_string();
 
+    let filepath = std::env::var("UPLOADED_FILE_LOCATION").expect("UPLOADED_FILE_LOCATION");
+
     let mut content = String::new();
     let mut iids: Vec<String> = Vec::new();
     content.push_str("[");
@@ -28,8 +31,39 @@ async fn new_task(
             content.push_str(",");
         }
         content.push_str("{");
-        content.push_str(format!("\"src\":\"http://localhost:8080/api/image/{}.jpg\",", image.iid).as_str());
+        content.push_str(
+            format!(
+                "\"src\":\"http://localhost:8080/api/image/{}.jpg\",",
+                image.iid
+            )
+            .as_str(),
+        );
         content.push_str(format!("\"name\":\"{}\",", image.name).as_str());
+
+        let (width, height) = match size(format!("{}/images/{}.jpg", filepath, image.iid)) {
+            Ok(dim) => (dim.width, dim.height),
+            Err(why) => {
+                let error_msg = format!("{:?}", why);
+                error!("{}", error_msg.clone());
+                return Ok(HttpResponse::InternalServerError().body(error_msg));
+            }
+        };
+        content.push_str(format!("\"width\":{},", width).as_str());
+        content.push_str(format!("\"height\":{},", height).as_str());
+        content.push_str(format!("\"id\":\"{}\",", image.iid).as_str());
+        let pool_ = pool.clone();
+        let iid_ = image.iid.clone();
+        let date_captured = web::block(move || {
+            let conn = pool_.get()?;
+            get_image_create_time_by_iid(&iid_, &conn)
+        })
+        .await
+        .map_err(|e| {
+            error!("{}", e);
+            HttpResponse::InternalServerError().body(e.to_string())
+        })?;
+        content.push_str(format!("\"date_captured\":\"{}\",", date_captured).as_str());
+
         content.push_str("\"regions\":[]}");
 
         iids.push(image.iid.to_owned());
@@ -199,85 +233,4 @@ async fn get_task_list(
     })?;
 
     Ok(HttpResponse::Ok().json(tasks))
-}
-
-#[derive(Deserialize)]
-struct ExportTaskListQuery {
-    export_type: u8, // 0: PASCAL VOC, 1: COCO
-}
-
-#[get("/task/{tid}/export")]
-async fn export_task(
-    pool: web::Data<crate::DbPool>,
-    id: Identity,
-    tid: web::Path<String>,
-    info: web::Query<ExportTaskListQuery>,
-) -> Result<HttpResponse, Error> {
-    if id.identity().is_none() {
-        return Ok(HttpResponse::Unauthorized().finish());
-    }
-    let uid = id.identity().unwrap();
-
-    if info.export_type > 1 {
-        return Ok(HttpResponse::BadRequest().body("Unsupported export type"));
-    }
-
-    let task = web::block(move || {
-        let conn = pool.get()?;
-        get_task_by_tid(&tid, &conn)
-    })
-    .await
-    .map_err(|e| {
-        error!("{}", e);
-        HttpResponse::InternalServerError().body(e.to_string())
-    })?;
-
-    if task.owner != uid || task.worker != Some(uid) {
-        return Ok(HttpResponse::Forbidden().finish());
-    }
-
-    Ok(HttpResponse::Ok().into())
-
-    // TODO: finish it
-
-    // let tasks = web::block(move || {
-    //     let conn = pool.get()?;
-    //     match info.task_type {
-    //         0 => select_task_list(Some(&uid), None, None, &conn),
-    //         1 => select_task_list(None, Some(&uid), None, &conn),
-    //         2 => select_task_list(None, None, Some(&0), &conn),
-    //         _ => unreachable!(),
-    //     }
-    // })
-    // .await
-    // .map_err(|e| {
-    //     error!("{}", e);
-    //     HttpResponse::InternalServerError().body(e.to_string())
-    // })?;
-
-    // let mut csv = String::new();
-    // csv.push_str("id,title,description,tags,status,created_at,updated_at\n");
-    // for task in tasks {
-    //     csv.push_str(&format!(
-    //         "{},{},{},{},{},{},{}\n",
-    //         task.tid,
-    //         task.title,
-    //         task.description,
-    //         task.tags,
-    //         task.status,
-    //         task.created_at,
-    //         task.updated_at
-    //     ));
-    // }
-
-    // let mut resp = HttpResponse::Ok();
-    // resp.set_header(
-    //     header::CONTENT_DISPOSITION,
-    //     header::HeaderValue::from_str(&format!("attachment; filename={}", "task.csv")).unwrap(),
-    // );
-    // resp.set_header(header::CONTENT_TYPE, "text/json");
-    // resp.set_header(header::CONTENT_LENGTH, csv.len() as u64);
-    // resp.set_body(csv);
-
-    // Ok(resp)
 }

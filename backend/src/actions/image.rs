@@ -36,3 +36,17 @@ pub fn get_images_id_by_uid(uid_: &str, conn: &MysqlConnection) -> Result<Vec<St
 
     Ok(images_id)
 }
+
+pub fn get_image_create_time_by_iid(
+    iid_: &str,
+    conn: &MysqlConnection,
+) -> Result<chrono::NaiveDateTime, DbError> {
+    use crate::schema::images::dsl::*;
+
+    let create_time = images
+        .filter(id.eq(iid_))
+        .select(created_at)
+        .first::<chrono::NaiveDateTime>(conn)?;
+
+    Ok(create_time)
+}

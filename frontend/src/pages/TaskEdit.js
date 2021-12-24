@@ -12,7 +12,7 @@ export default function Task(taskType) {
   const utils = useUtils();
   const location = useLocation();
   const navigate = useNavigate();
-  const tid = location.pathname.substr(location.pathname.lastIndexOf('/') + 1);
+  const tid = location.pathname.substring(location.pathname.lastIndexOf('/') + 1);
 
   const [save, setSave] = useState(false);
   const handleSave = () => setSave(true);
@@ -20,7 +20,11 @@ export default function Task(taskType) {
 
   const [task, setTask] = useState();
   const updateTaskList = () => {
-    utils.fetch.get(`/task/${tid}`).then((res) => setTask(res.data));
+    utils.fetch.get(`/task/${tid}`).then((res) => {
+      console.log(res.data);
+      console.log(JSON.parse(res.data.content));
+      setTask(res.data);
+    });
   };
 
   useEffect(() => {
