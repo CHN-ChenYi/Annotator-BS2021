@@ -36,11 +36,14 @@ pub fn user_login(
 ) -> Result<Option<models::PublicUser>, DbError> {
     use crate::schema::users::dsl::*;
 
-    let user = users
+    let user = match users
         .filter(email.eq(email_))
         .first::<models::User>(conn)
         .optional()?
-        .unwrap();
+    {
+        Some(user) => user,
+        None => return Err(DbError::from("User not found"))
+    };
 
     let valid = verify(password_.to_owned(), &user.password)?;
 

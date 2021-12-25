@@ -1,6 +1,6 @@
 use actix_identity::Identity;
 use actix_web::{post, web, Error, HttpResponse};
-use check_if_email_exists::{check_email, CheckEmailInput};
+// use check_if_email_exists::{check_email, CheckEmailInput};
 use log::error;
 
 use crate::actions::*;
@@ -16,11 +16,14 @@ async fn signup_user(
         return Ok(HttpResponse::BadRequest().json("Invalid email address".to_owned()));
     }
 
-    let input = CheckEmailInput::new(vec![form.email.clone().into()]);
-    let result = check_email(&input).await;
-    if result[0].is_reachable != check_if_email_exists::Reachable::Safe {
-        return Ok(HttpResponse::BadRequest().json("Email address is not reachable".to_owned()));
-    };
+    // let input = CheckEmailInput::new(vec![form.email.clone().into()]);
+    // let result = check_email(&input).await;
+    // if result[0].is_reachable != check_if_email_exists::Reachable::Safe
+    //     || result[0].is_reachable != check_if_email_exists::Reachable::Risky
+    //     || result[0].is_reachable != check_if_email_exists::Reachable::Unknown
+    // {
+    //     return Ok(HttpResponse::BadRequest().json("Email address is not reachable".to_owned()));
+    // };
 
     let user = web::block(move || {
         let conn = pool.get()?;

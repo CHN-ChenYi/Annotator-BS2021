@@ -260,20 +260,22 @@ export default function TaskCard({ task, index, taskType, updateTaskList }) {
             )}
           </InfoStyle>
         </CardContent>
-        {(taskType.taskType === 0 || taskType.taskType === 1) && task.status !== 1 && (
-          <Label
-            variant="filled"
-            color={task.status === 2 ? 'info' : 'success'}
-            sx={{
-              zIndex: 9,
-              top: 16,
-              right: 16,
-              position: 'absolute'
-            }}
-          >
-            {task.status === 2 ? 'Completed' : 'Accepted'}
-          </Label>
-        )}
+        {(taskType.taskType === 0 || taskType.taskType === 1) &&
+          task.status !== 0 &&
+          task.status !== 1 && (
+            <Label
+              variant="filled"
+              color={task.status === 2 ? 'info' : 'success'}
+              sx={{
+                zIndex: 9,
+                top: 16,
+                right: 16,
+                position: 'absolute'
+              }}
+            >
+              {task.status === 2 ? 'Completed' : 'Accepted'}
+            </Label>
+          )}
       </Card>
     </Grid>
   );
