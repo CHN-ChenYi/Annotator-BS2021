@@ -1,12 +1,14 @@
+import X2JS from 'x2js';
+import JSZip from 'jszip';
+import FileSaver from 'file-saver';
+
 export function exportCOCO(task, data) {
-  console.log(task);
-  console.log(data);
   const date = new Date();
   const info = {
     year: date.getFullYear(),
     version: '1.0',
     description: String.raw`${task.title}\n${task.description}`,
-    contributor: `${task.owner.username} ${task.worker.username}`,
+    contributor: `${task.owner.username}, ${task.worker.username}`,
     url: window.location.origin,
     date_created: `${date.getFullYear()}/${date.getMonth()}/${date.getDay()}`
   };
@@ -99,7 +101,7 @@ export function exportCOCO(task, data) {
           break;
       }
       region.tags.forEach((tag) => {
-        const annotation = {
+        annotations.push({
           id: region.id,
           image_id: image.id,
           category_id: categoryIdMap[tag],
@@ -107,25 +109,89 @@ export function exportCOCO(task, data) {
           area,
           bbox: [beginX, beginY, width, height],
           iscrowd: 0
-        };
-        annotations.push(annotation);
+        });
       });
     });
   });
   const COCO = { info, licenses, images, categories, annotations };
 
   const blob = new Blob([JSON.stringify(COCO)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `COCO-${task.title}-${date.getFullYear()}${date.getMonth()}${date.getDay()}`;
-  document.documentElement.appendChild(a);
-  a.click();
-  document.documentElement.removeChild(a);
+  FileSaver(blob, `COCO-${task.title}-${date.getFullYear()}${date.getMonth()}${date.getDay()}`);
 }
 
 export function exportVOC(task, data) {
-  console.log('exportVOC');
-  console.log(task);
-  console.log(data);
+  const date = new Date();
+
+  const zip = new JSZip();
+  const x2js = new X2JS();
+
+  JSON.parse(data.content).forEach((image) => {
+    const annotation = {
+      folder: task.title,
+      filename: image.name,
+      path: image.src,
+      source: undefined,
+      size: { width: image.width, height: image.height, depth: 3 },
+      segmented: 0,
+      object: []
+    };
+    image.regions.forEach((region) => {
+      let xMin = image.width;
+      let xMax = 0;
+      let yMin = image.height;
+      let yMax = 0;
+      switch (region.type) {
+        case 'box':
+          xMin = image.width * region.x;
+          yMin = image.height * region.y;
+          xMax = image.width * region.w + xMin;
+          yMax = image.height * region.h + yMin;
+          break;
+        case 'point':
+          xMin = image.width * region.x;
+          yMin = image.height * region.y;
+          xMax = xMin;
+          yMax = yMin;
+          break;
+        case 'polygon':
+          region.points.forEach((point) => {
+            xMin = Math.min(xMin, point[0]);
+            yMin = Math.min(yMin, point[1]);
+            xMax = Math.max(xMax, point[0]);
+            yMax = Math.max(yMax, point[1]);
+          });
+          xMin *= image.width;
+          yMin *= image.height;
+          xMax *= image.width;
+          yMax *= image.height;
+          break;
+        case 'line':
+          xMin = image.width * Math.min(region.x1, region.x2);
+          yMin = image.height * Math.min(region.y1, region.y2);
+          xMax = image.width * Math.max(region.x1, region.x2);
+          yMax = image.height * Math.max(region.y1, region.y2);
+          break;
+        default:
+          break;
+      }
+      region.tags.forEach((tag) => {
+        annotation.object.push({
+          name: tag,
+          truncate: 0,
+          difficult: 0,
+          bndbox: {
+            xmin: xMin,
+            xmax: xMax,
+            ymin: yMin,
+            ymax: yMax
+          }
+        });
+      });
+    });
+    const blob = new Blob([x2js.js2xml({ annotation })], { type: 'application/xml' });
+    zip.file(`${image.name}.xml`, blob);
+  });
+  zip.generateAsync({ type: 'blob' }).then((content) => {
+    FileSaver(content, `VOC-${task.title}-${date.getFullYear()}${date.getMonth()}${date.getDay()}`);
+  });
 }

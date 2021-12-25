@@ -51,10 +51,12 @@
     "change-case": "^4.1.2",
     "date-fns": "^2.24.0",
     "faker": "^5.5.3",
+    "file-saver": "^2.0.5",
     "formik": "^2.2.9",
     "framer-motion": "^4.1.17",
     "history": "^5.0.1",
     "js-md5": "^0.7.3",
+    "jszip": "^3.7.1",
     "lodash": "^4.17.21",
     "notistack": "^2.0.2",
     "numeral": "^2.0.6",
@@ -70,6 +72,7 @@
     "simplebar": "^5.3.5",
     "simplebar-react": "^2.3.5",
     "web-vitals": "^2.1.0",
+    "x2js": "^3.4.2",
     "yup": "^0.32.9"
   },
   "devDependencies": {
