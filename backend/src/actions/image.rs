@@ -1,4 +1,6 @@
 use diesel::prelude::*;
+use oss_rust_sdk::prelude::*;
+use std::collections::HashMap;
 
 use crate::models;
 use crate::DbError;
@@ -10,11 +12,40 @@ pub fn insert_new_image(
 ) -> Result<models::Image, DbError> {
     use crate::schema::images::dsl::*;
 
+    let id__ = id_.to_owned();
     let new_image = models::Image {
-        id: id_.to_owned(),
+        id: id__.clone(),
         uid: uid_.to_owned(),
         tid: None,
         created_at: chrono::Utc::now().naive_utc(),
+    };
+
+    if std::str::FromStr::from_str(&std::env::var("OSS").expect("OSS")) == Ok(true) {
+        let filepath = std::env::var("UPLOADED_FILE_LOCATION").expect("UPLOADED_FILE_LOCATION");
+        let filename = format!("{}/images/{}.jpg", filepath, id__.clone());
+        let oss_instance = OSS::new(
+            std::env::var("OSS_ACCESS_KEY_ID").expect("OSS_ACCESS_KEY_ID"),
+            std::env::var("OSS_ACCESS_KEY_SECRET").expect("OSS_ACCESS_KEY_SECRET"),
+            std::env::var("OSS_ENDPOINT").expect("OSS_ENDPOINT"),
+            std::env::var("OSS_BUCKET").expect("OSS_BUCKET"),
+        );
+        if !oss_instance.put_object_from_file(
+            filename.clone(),
+            id__.clone(),
+            None::<HashMap<&str, &str>>,
+            None,
+        ).is_ok() {
+            return Err(DbError::from(format!(
+                "Failed to upload image to OSS: {}",
+                id__.to_owned()
+            )));
+        }
+        match std::fs::remove_file(filename) {
+            Ok(_) => (),
+            Err(e) => {
+                return Err(DbError::from(e));
+            }
+        }
     };
 
     diesel::insert_into(images)

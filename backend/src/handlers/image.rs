@@ -1,3 +1,5 @@
+use oss_rust_sdk::prelude::*;
+use std::collections::HashMap;
 use std::io::Write;
 
 use actix_identity::Identity;
@@ -69,4 +71,35 @@ async fn get_images_id(
     })?;
 
     Ok(HttpResponse::Ok().json(images_id))
+}
+
+#[get("image/oss/{iid}")]
+async fn get_image_from_oss(
+    id: Identity,
+    iid: web::Path<String>,
+) -> Result<HttpResponse, Error> {
+    if id.identity().is_none() {
+        return Ok(HttpResponse::Unauthorized().finish());
+    }
+
+    if std::str::FromStr::from_str(&std::env::var("OSS").expect("OSS")) != Ok(true) {
+        return Ok(HttpResponse::InternalServerError().body("OSS is not enabled."));
+    }
+
+    let image = web::block(move || {
+        let oss_instance = OSS::new(
+            std::env::var("OSS_ACCESS_KEY_ID").expect("OSS_ACCESS_KEY_ID"),
+            std::env::var("OSS_ACCESS_KEY_SECRET").expect("OSS_ACCESS_KEY_SECRET"),
+            std::env::var("OSS_ENDPOINT").expect("OSS_ENDPOINT"),
+            std::env::var("OSS_BUCKET").expect("OSS_BUCKET"),
+        );
+        oss_instance.get_object(iid.as_ref(), None::<HashMap<&str, &str>>, None)
+    })
+    .await
+    .map_err(|e| {
+        error!("{}", e);
+        HttpResponse::InternalServerError().body(e.to_string())
+    })?;
+
+    Ok(HttpResponse::Ok().content_type("image/jpeg").body(image))
 }

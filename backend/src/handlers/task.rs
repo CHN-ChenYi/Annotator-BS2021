@@ -22,6 +22,12 @@ async fn new_task(
     let tid = Uuid::new_v4().to_string();
 
     let filepath = std::env::var("UPLOADED_FILE_LOCATION").expect("UPLOADED_FILE_LOCATION");
+    let host = std::env::var("HOST").expect("HOST");
+
+    let oss = match std::str::FromStr::from_str(&std::env::var("OSS").expect("OSS")) {
+        Ok(true) => true,
+        _ => false,
+    };
 
     let mut content = String::new();
     let mut iids: Vec<String> = Vec::new();
@@ -31,15 +37,15 @@ async fn new_task(
             content.push_str(",");
         }
         content.push_str("{");
-        content.push_str(
-            format!(
-                "\"src\":\"http://localhost:8080/api/image/{}.jpg\",",
-                image.iid
-            )
-            .as_str(),
-        );
+        match oss {
+            false => content
+                .push_str(format!("\"src\":\"{}/api/image/{}.jpg\",", host, image.iid).as_str()),
+            true => content
+                .push_str(format!("\"src\":\"{}/api/image/oss/{}\",", host, image.iid).as_str()),
+        };
         content.push_str(format!("\"name\":\"{}\",", image.name).as_str());
 
+        // TODO: support OSS
         let (width, height) = match size(format!("{}/images/{}.jpg", filepath, image.iid)) {
             Ok(dim) => (dim.width, dim.height),
             Err(why) => {
