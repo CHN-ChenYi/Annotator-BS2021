@@ -21,7 +21,7 @@ export default function RegisterForm() {
   const RegisterSchema = Yup.object().shape({
     username: Yup.string().min(6, 'Too Short!').max(50, 'Too Long!').required('Username required'),
     email: Yup.string().email('Email must be a valid email address').required('Email is required'),
-    password: Yup.string().required('Password is required')
+    password: Yup.string().min(6, 'Too Short!').required('Password is required')
   });
 
   const formik = useFormik({
