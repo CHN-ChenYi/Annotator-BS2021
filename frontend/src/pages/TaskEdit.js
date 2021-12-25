@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ReactImageAnnotate from 'react-image-annotate';
 // material
-import { Dialog, Container, Button, DialogActions } from '@mui/material';
+import { Dialog, Container, Button, DialogActions, Grid } from '@mui/material';
 // components
 import Page from '../components/Page';
 //
@@ -21,8 +21,6 @@ export default function Task(taskType) {
   const [task, setTask] = useState();
   const updateTaskList = () => {
     utils.fetch.get(`/task/${tid}`).then((res) => {
-      console.log(res.data);
-      console.log(JSON.parse(res.data.content));
       setTask(res.data);
     });
   };
@@ -77,24 +75,56 @@ export default function Task(taskType) {
         </Dialog>
         <Dialog open={save} onClose={handleSaveClose}>
           <DialogActions>
-            <Button
-              variant="contained"
-              sx={{
-                margin: 2
-              }}
-              onClick={() => submit(1)}
-            >
-              Save
-            </Button>
-            <Button
-              variant="contained"
-              sx={{
-                margin: 2
-              }}
-              onClick={() => submit(2)}
-            >
-              Complete
-            </Button>
+            <Grid container spacing={2} columns={16}>
+              <Grid item xs={6}>
+                <Button
+                  variant="contained"
+                  sx={{
+                    width: '100%'
+                  }}
+                  onClick={() => submit(1)}
+                >
+                  Save
+                </Button>
+              </Grid>
+              <Grid item xs={6}>
+                <Button
+                  variant="contained"
+                  sx={{
+                    width: '100%'
+                  }}
+                  onClick={() => submit(2)}
+                >
+                  Complete
+                </Button>
+              </Grid>
+              {task && (task.status === 2 || task.status === 3) && (
+                <Grid item xs={6}>
+                  <Button
+                    variant="contained"
+                    sx={{
+                      width: '100%'
+                    }}
+                    onClick={() => submit(3)}
+                  >
+                    Accept
+                  </Button>
+                </Grid>
+              )}
+              {task && (task.status === 2 || task.status === 3) && (
+                <Grid item xs={6}>
+                  <Button
+                    variant="contained"
+                    sx={{
+                      width: '100%'
+                    }}
+                    onClick={() => submit(1)}
+                  >
+                    Reject
+                  </Button>
+                </Grid>
+              )}
+            </Grid>
           </DialogActions>
         </Dialog>
       </Container>
