@@ -1,4 +1,5 @@
 use diesel::prelude::*;
+use imagesize::size;
 use oss_rust_sdk::prelude::*;
 use std::collections::HashMap;
 
@@ -11,17 +12,29 @@ pub fn insert_new_image(
     conn: &MysqlConnection,
 ) -> Result<models::Image, DbError> {
     use crate::schema::images::dsl::*;
-
     let id__ = id_.to_owned();
+
+    let filepath = std::env::var("UPLOADED_FILE_LOCATION").expect("UPLOADED_FILE_LOCATION");
+    let (image_width, image_height) = match size(format!("{}/images/{}.jpg", filepath, id__)) {
+        Ok(dim) => (dim.width, dim.height),
+        Err(why) => {
+            return Err(DbError::from(format!(
+                "Failed to get image size: {:?}",
+                why
+            )));
+        }
+    };
+
     let new_image = models::Image {
         id: id__.clone(),
         uid: uid_.to_owned(),
         tid: None,
+        height: Some(image_height as i32),
+        width: Some(image_width as i32),
         created_at: chrono::Utc::now().naive_utc(),
     };
 
     if std::str::FromStr::from_str(&std::env::var("OSS").expect("OSS")) == Ok(true) {
-        let filepath = std::env::var("UPLOADED_FILE_LOCATION").expect("UPLOADED_FILE_LOCATION");
         let filename = format!("{}/images/{}.jpg", filepath, id__.clone());
         let oss_instance = OSS::new(
             std::env::var("OSS_ACCESS_KEY_ID").expect("OSS_ACCESS_KEY_ID"),
@@ -29,12 +42,15 @@ pub fn insert_new_image(
             std::env::var("OSS_ENDPOINT").expect("OSS_ENDPOINT"),
             std::env::var("OSS_BUCKET").expect("OSS_BUCKET"),
         );
-        if !oss_instance.put_object_from_file(
-            filename.clone(),
-            id__.clone(),
-            None::<HashMap<&str, &str>>,
-            None,
-        ).is_ok() {
+        if !oss_instance
+            .put_object_from_file(
+                filename.clone(),
+                id__.clone(),
+                None::<HashMap<&str, &str>>,
+                None,
+            )
+            .is_ok()
+        {
             return Err(DbError::from(format!(
                 "Failed to upload image to OSS: {}",
                 id__.to_owned()
@@ -68,16 +84,11 @@ pub fn get_images_id_by_uid(uid_: &str, conn: &MysqlConnection) -> Result<Vec<St
     Ok(images_id)
 }
 
-pub fn get_image_create_time_by_iid(
-    iid_: &str,
-    conn: &MysqlConnection,
-) -> Result<chrono::NaiveDateTime, DbError> {
+pub fn get_image_by_iid(iid_: &str, conn: &MysqlConnection) -> Result<models::Image, DbError> {
     use crate::schema::images::dsl::*;
 
-    let create_time = images
+    images
         .filter(id.eq(iid_))
-        .select(created_at)
-        .first::<chrono::NaiveDateTime>(conn)?;
-
-    Ok(create_time)
+        .first::<models::Image>(conn)
+        .map_err(|e| DbError::from(e))
 }

@@ -7,5 +7,7 @@ pub struct Image {
     pub id: String,
     pub uid: String,
     pub tid: Option<String>,
+    pub height: Option<i32>,
+    pub width: Option<i32>,
     pub created_at: chrono::NaiveDateTime,
 }

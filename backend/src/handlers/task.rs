@@ -1,6 +1,5 @@
 use actix_identity::Identity;
 use actix_web::{delete, get, post, put, web, Error, HttpResponse};
-use imagesize::size;
 use log::error;
 use serde::Deserialize;
 use uuid::Uuid;
@@ -21,7 +20,6 @@ async fn new_task(
 
     let tid = Uuid::new_v4().to_string();
 
-    let filepath = std::env::var("UPLOADED_FILE_LOCATION").expect("UPLOADED_FILE_LOCATION");
     let host = std::env::var("HOST").expect("HOST");
 
     let oss = match std::str::FromStr::from_str(&std::env::var("OSS").expect("OSS")) {
@@ -45,30 +43,25 @@ async fn new_task(
         };
         content.push_str(format!("\"name\":\"{}\",", image.name).as_str());
 
-        // TODO: support OSS
-        let (width, height) = match size(format!("{}/images/{}.jpg", filepath, image.iid)) {
-            Ok(dim) => (dim.width, dim.height),
-            Err(why) => {
-                let error_msg = format!("{:?}", why);
-                error!("{}", error_msg.clone());
-                return Ok(HttpResponse::InternalServerError().body(error_msg));
-            }
-        };
-        content.push_str(format!("\"width\":{},", width).as_str());
-        content.push_str(format!("\"height\":{},", height).as_str());
-        content.push_str(format!("\"id\":\"{}\",", image.iid).as_str());
         let pool_ = pool.clone();
         let iid_ = image.iid.clone();
-        let date_captured = web::block(move || {
+        let image_info = web::block(move || {
             let conn = pool_.get()?;
-            get_image_create_time_by_iid(&iid_, &conn)
+            get_image_by_iid(&iid_, &conn)
         })
         .await
         .map_err(|e| {
             error!("{}", e);
             HttpResponse::InternalServerError().body(e.to_string())
         })?;
-        content.push_str(format!("\"date_captured\":\"{}\",", date_captured).as_str());
+        if let Some(width) = image_info.width {
+            content.push_str(format!("\"width\":{},", width).as_str());
+        }
+        if let Some(height) = image_info.height {
+            content.push_str(format!("\"height\":{},", height).as_str());
+        }
+        content.push_str(format!("\"id\":\"{}\",", image.iid).as_str());
+        content.push_str(format!("\"date_captured\":\"{}\",", image_info.created_at).as_str());
 
         content.push_str("\"regions\":[]}");
 

@@ -3,6 +3,8 @@ table! {
         id -> Varchar,
         uid -> Varchar,
         tid -> Nullable<Varchar>,
+        height -> Nullable<Integer>,
+        width -> Nullable<Integer>,
         created_at -> Timestamp,
     }
 }
