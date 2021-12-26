@@ -1,7 +1,6 @@
 {
   "name": "annotator-bs2021-frontend",
   "author": "CHN-CHENYi",
-  "licence": "MIT",
   "version": "1.0",
   "private": true,
   "scripts": {
