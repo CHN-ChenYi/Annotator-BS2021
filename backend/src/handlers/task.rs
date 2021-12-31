@@ -7,6 +7,15 @@ use uuid::Uuid;
 use crate::actions::*;
 use crate::models::*;
 
+fn get_iid_from_url(url: &str) -> std::string::String {
+    str::replace(url.get(url.rfind('/').unwrap() + 1..).unwrap(), ".jpg", "")
+    // let re = regex::Regex::new(r"/(.*)").unwrap();
+    // for cap in re.captures_iter(url) {
+    //     return dbg!(str::replace(&cap[1], ".jpg", ""));
+    // }
+    // return "".to_string();
+}
+
 #[post("/task")]
 async fn new_task(
     pool: web::Data<crate::DbPool>,
@@ -20,13 +29,6 @@ async fn new_task(
 
     let tid = Uuid::new_v4().to_string();
 
-    let host = std::env::var("HOST").expect("HOST");
-
-    let oss = match std::str::FromStr::from_str(&std::env::var("OSS").expect("OSS")) {
-        Ok(true) => true,
-        _ => false,
-    };
-
     let mut content = String::new();
     let mut iids: Vec<String> = Vec::new();
     content.push_str("[");
@@ -35,19 +37,15 @@ async fn new_task(
             content.push_str(",");
         }
         content.push_str("{");
-        match oss {
-            false => content
-                .push_str(format!("\"src\":\"{}/api/image/{}.jpg\",", host, image.iid).as_str()),
-            true => content
-                .push_str(format!("\"src\":\"{}/api/image/oss/{}\",", host, image.iid).as_str()),
-        };
+        content.push_str(format!("\"src\":\"{}\",", image.iid).as_str());
         content.push_str(format!("\"name\":\"{}\",", image.name).as_str());
 
         let pool_ = pool.clone();
-        let iid_ = image.iid.clone();
+        let iid_ = get_iid_from_url(&image.iid);
+        let iid__ = iid_.clone();
         let image_info = web::block(move || {
             let conn = pool_.get()?;
-            get_image_by_iid(&iid_, &conn)
+            get_image_by_iid(&iid__, &conn)
         })
         .await
         .map_err(|e| {
@@ -60,12 +58,12 @@ async fn new_task(
         if let Some(height) = image_info.height {
             content.push_str(format!("\"height\":{},", height).as_str());
         }
-        content.push_str(format!("\"id\":\"{}\",", image.iid).as_str());
+        content.push_str(format!("\"id\":\"{}\",", iid_).as_str());
         content.push_str(format!("\"date_captured\":\"{}\",", image_info.created_at).as_str());
 
         content.push_str("\"regions\":[]}");
 
-        iids.push(image.iid.to_owned());
+        iids.push(iid_.to_owned());
     }
     content.push_str("]");
 

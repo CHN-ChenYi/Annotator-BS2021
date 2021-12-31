@@ -8,7 +8,7 @@ export function exportCOCO(task, data) {
     year: date.getFullYear(),
     version: '1.0',
     description: String.raw`${task.title}\n${task.description}`,
-    contributor: `${task.owner.username}, ${task.worker.username}`,
+    contributor: `${task.owner.username}, ${task.worker?.username}`,
     url: window.location.origin,
     date_created: `${date.getFullYear()}/${date.getMonth()}/${date.getDay()}`
   };
@@ -126,6 +126,7 @@ export function exportVOC(task, data) {
   const x2js = new X2JS();
 
   JSON.parse(data.content).forEach((image) => {
+    console.log(image);
     const annotation = {
       folder: task.title,
       filename: image.name,

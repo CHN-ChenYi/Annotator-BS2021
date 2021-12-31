@@ -45,7 +45,7 @@ pub fn insert_new_image(
         if !oss_instance
             .put_object_from_file(
                 filename.clone(),
-                id__.clone(),
+                format!("{}.jpg", id__),
                 None::<HashMap<&str, &str>>,
                 None,
             )
@@ -88,7 +88,7 @@ pub fn get_image_by_iid(iid_: &str, conn: &MysqlConnection) -> Result<models::Im
     use crate::schema::images::dsl::*;
 
     images
-        .filter(id.eq(iid_))
+        .filter(id.eq(dbg!(iid_)))
         .first::<models::Image>(conn)
         .map_err(|e| DbError::from(e))
 }

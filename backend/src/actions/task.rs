@@ -148,12 +148,24 @@ pub fn select_task_list(
 
     let result = query.order(updated_at.desc()).load::<models::Task>(conn)?;
 
+    let host = std::env::var("HOST").expect("HOST");
+    let oss_path = std::env::var("OSS_PATH").expect("OSS_PATH");
+
+    let oss = match std::str::FromStr::from_str(&std::env::var("OSS").expect("OSS")) {
+        Ok(true) => true,
+        _ => false,
+    };
+
     let mut list: Vec<models::TaskListEntry> = Vec::new();
     for row in result.iter() {
         let cover_image_ = images
             .filter(tid.eq(row.id.to_owned()))
             .first::<models::Image>(conn)?
             .id;
+        let cover_image_path = match oss {
+            false => format!("{}/api/image/{}.jpg", host, cover_image_),
+            true => format!("{}/{}.jpg", oss_path, cover_image_),
+        };
         let owner_pub = actions::get_user_by_id(&row.owner, conn)?.unwrap();
         let worker_pub = match &row.worker {
             Some(worker__) => match actions::get_user_by_id(&worker__, conn)? {
@@ -171,7 +183,7 @@ pub fn select_task_list(
             status: row.status,
             created_at: row.created_at,
             updated_at: row.updated_at,
-            cover_image: cover_image_.to_owned(),
+            cover_image: cover_image_path.to_owned(),
         });
     }
 

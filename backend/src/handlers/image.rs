@@ -70,7 +70,20 @@ async fn get_images_id(
         HttpResponse::InternalServerError().body(e.to_string())
     })?;
 
-    Ok(HttpResponse::Ok().json(images_id))
+    let host = std::env::var("HOST").expect("HOST");
+    let oss_path = std::env::var("OSS_PATH").expect("OSS_PATH");
+
+    let oss = match std::str::FromStr::from_str(&std::env::var("OSS").expect("OSS")) {
+        Ok(true) => true,
+        _ => false,
+    };
+
+    let images_paths = images_id.iter().map(|iid| match oss {
+        false => format!("{}/api/image/{}.jpg", host, iid),
+        true => format!("{}/{}.jpg", oss_path, iid),
+    }).collect::<Vec<String>>();
+
+    Ok(HttpResponse::Ok().json(images_paths))
 }
 
 #[get("image/oss/{iid}")]

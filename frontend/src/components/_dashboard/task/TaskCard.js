@@ -145,7 +145,7 @@ export default function TaskCard({ task, index, taskType, updateTaskList }) {
             }}
           />
 
-          <CoverImgStyle src={utils.getImage(task.cover_image)} />
+          <CoverImgStyle src={task.cover_image} />
         </CardMediaStyle>
 
         <CardContent
